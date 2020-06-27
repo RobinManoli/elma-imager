@@ -1,0 +1,30 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<title>Rec Handler</title>
+	<meta name="description" content="">
+	<meta name="author" content="Robin Manoli">
+
+	<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+	<script src="index.js"></script>
+	<script>
+	window.onload = function(){
+		require(["./controller"], function(controller){
+		controller("lev/limpsy05.lev", "./img/default", document.getElementById("rec-player"), document)(function(cnt){
+			cnt.resize(1024, 768);
+			["limpsy05finik.rec", "02fmzspin.rec", "06b0ne.rec", "07K2544sl.rec", "10Spef1050.rec", "14zb900s2.rec", "16b0ne.rec", "19zb1044.rec", "29be420.rec", "29Spef4114.rec", "31z10134.rec", "33z5084.rec", "34b0ne.rec", "limpsy01oke.rec"].forEach(function(recFileName){
+				cnt.loadReplay("rec/" + recFileName); });
+			});
+		});
+	};
+	</script>
+	<div id="rec-player"></div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+ Volume in drive C is Windows
+ Volume Serial Number is DC99-23E2
+
+ Directory of C:\Users\Sara\Desktop\robin\Dropbox\firma\elma-rechandler\rec
+
+2020-06-27  07:01    <DIR>          .
+2020-06-27  07:01    <DIR>          ..
+2020-06-25  09:48            14ÿ149 02fmzspin.rec
+2020-06-25  09:57             1ÿ026 06b0ne.rec
+2020-06-25  08:25            21ÿ872 07K2544sl.rec
+2020-06-25  08:26             8ÿ944 10Spef1050.rec
+2020-06-25  10:04             6ÿ374 14zb900s2.rec
+2020-06-25  09:57            38ÿ602 16b0ne.rec
+2020-06-25  10:04             9ÿ162 19zb1044.rec
+2020-06-25  09:53             3ÿ729 29be420.rec
+2020-06-25  08:33            35ÿ613 29Spef4114.rec
+2020-06-25  08:34            57ÿ543 31z10134.rec
+2020-06-25  08:35            43ÿ374 33z5084.rec
+2020-06-25  09:57             3ÿ615 34b0ne.rec
+2020-06-25  11:59           388ÿ650 limpsy01oke.rec
+2020-06-25  11:56           488ÿ343 limpsy05finik.rec
+2020-06-27  07:01                 0 rec.txt
+              15 File(s)      1ÿ120ÿ996 bytes
+               2 Dir(s)  17ÿ983ÿ381ÿ504 bytes free
