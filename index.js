@@ -1710,8 +1710,9 @@ exports.make = function(levRd, lgr, makeCanvas){
 			canv.lineTo(0, h);
 			canv.clip();
 
-			canv.fillStyle = "yellow";
-			canv.fillRect(0, 0, w, h);
+			//canv.fillStyle = "yellow";
+			//canv.fillRect(0, 0, w, h);
+			canv.clearRect(0, 0, w, h);
 
 			if(focus && replays.length > 0){
 				var vph = Math.floor(h/replays[0].subs.length);

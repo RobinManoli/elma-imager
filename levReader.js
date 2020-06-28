@@ -57,7 +57,8 @@ exports.reader = function levReader(data){
 
 	var obj, pic; // initialised in the object literal :\
 
-	return window.lrd = {
+	//return window.lrd = {
+	return {
 		rightType: function(){
 			br.seek(offsType);
 			return br.seq(5) == "POT14";

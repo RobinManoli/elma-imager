@@ -378,7 +378,7 @@ exports.renderer = function levRender(reader, lgr){
 		}
 
 		canv.strokeStyle = "#ff0000";
-		if(window.dbg){
+		if(typeof window !== 'undefined' && window.dbg){
 			canv.strokeRect(0, 0, w*scale, h*scale);
 			if(window.dbg > 1){
 				canv.save();

@@ -6,12 +6,17 @@
     "browserify": "^16.5.1"
   },
   "scripts": {
-    "amd-fake": "browserify amd-fake.js -o amd.js"
+    "amd-fake": "browserify amd-fake.js -o amd.js",
+    "image": "node imageWriter.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RobinManoli/elma-rechandler.git"
   },
   "author": "RobinManoli",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.6.1",
+    "gifencoder": "^2.0.1"
+  }
 }

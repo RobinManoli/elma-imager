@@ -282,8 +282,9 @@ exports.make = function(levRd, lgr, makeCanvas){
 			canv.lineTo(0, h);
 			canv.clip();
 
-			canv.fillStyle = "yellow";
-			canv.fillRect(0, 0, w, h);
+			//canv.fillStyle = "yellow";
+			//canv.fillRect(0, 0, w, h);
+			canv.clearRect(0, 0, w, h);
 
 			if(focus && replays.length > 0){
 				var vph = Math.floor(h/replays[0].subs.length);
@@ -295,10 +296,11 @@ exports.make = function(levRd, lgr, makeCanvas){
 				canv.fillStyle = "yellow";
 				var csec = pad(2, t%100); t = Math.floor(t/100);
 				var sec = pad(2, t%60); t = Math.floor(t/60);
-				canv.fillText(t + ":" + sec + "." + csec, 10, 12*2);
-				canv.fillText(replays[0].objRn.applesTaken(frame) + "/" + replays[0].objRn.appleCount(), 10, 12*3);
+				// OSD
+				//canv.fillText(t + ":" + sec + "." + csec, 10, 12*2);
+				//canv.fillText(replays[0].objRn.applesTaken(frame) + "/" + replays[0].objRn.appleCount(), 10, 12*3);
 //				canv.fillText(arrow(replays[0].objRn.gravity(frame, 0)), 10, 12*4);
-				canv.fillRect(w*frame/replays[0].frameCount - 2.5, 0, 5, 12);
+				//canv.fillRect(w*frame/replays[0].frameCount - 2.5, 0, 5, 12);
 			}else
 				drawViewport(getViewport(0), canv, x, y, w, h, frame, null);
 			invalidate = false;
@@ -357,6 +359,7 @@ exports.make = function(levRd, lgr, makeCanvas){
 			replays.push(replay);
 			frameCount = calcFrameCount();
 			invalidate = true;
+			return replay;
 		},
 
 		changeFocus: changeFocus,

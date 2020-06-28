@@ -146,6 +146,12 @@ exports.make = function(path, mkImage, mkCanv){
 					ondone();
 				};
 				img.onerror = ondone;
+				// node canvas might load img synchronously, which means onload doesn't trigger, so trigger it here
+				if ( img.complete && img.naturalHeight !== 0 )
+				{
+					img.onload();
+					return true;
+				}
 				return false;
 			}
 			return loaded;
@@ -246,7 +252,7 @@ exports.make = function(path, mkImage, mkCanv){
 			};
 		}
 
-		var img = r.picts[i] = lazy_(path + "/picts/" + i + ".png", i, add);
+		var img = r.picts[i] = lazy_(path + "/" + i + ".png", i, add);
 		img.type = info[1];
 		img.dist = info[2];
 		img.clipping = info[3];
