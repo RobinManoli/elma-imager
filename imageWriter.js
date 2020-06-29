@@ -18,21 +18,24 @@ var RecReader = require("./recReader");
 var Lgr = require("./lgr");
 var Player = require("./player");
 
+module.exports = function(process) {
+
 // https://www.npmjs.com/package/commander#options
 program
-	.requiredOption('-r, --rec <pattern>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
-	.requiredOption('-l, --lev <name>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
+	.requiredOption('-r, --rec <pathfilename>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
+	.requiredOption('-l, --lev <pathfilename>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
 	.option('-o, --output <pattern>', 'output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/', '')
-	.option('-w, --width <number>', 'width of output frame (integer)', 0)
-	.option('-h, --height <number>', 'height of output frame (integer)', 0)
+	.option('-w, --width <number>', 'width of output frame', 0)
+	.option('-h, --height <number>', 'height of output frame', 0)
 	.option('-z, --zoom <number>', 'float, use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in', 1)
-	.option('-g, --lgr <name>', 'default or transparent', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
+	.option('-g, --lgr <name>', 'folder inside elma-imager/img with lgr images', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
 	.option('-s, --start <number>', 'starting frame (integer), or time in seconds (float, such as 1.0)', '0')
 	.option('-e, --end <number>', 'ending frame (integer), or time in seconds (float, such as 65.0)', '999999')
 	.option('-R, --replays <pattern>', 'path and filename for extra replays to render, for example elmapath/rec/29*.rec')
 	.option('-d, --delay <number>', 'delay in milliseconds between displaying each frame in .gif', 33)
 	.option('-D, --debug', 'debug output')
 	//.option('--shirt <name>', 'path and filename for shirt to use, elmapath/bmp/nickname.bmp')
+	//.option('-b --bike <name>', 'path for bike to use, for example elmapath/img/player1')
 	//.option('-Z --zoom-fit', 'fill level inside output frame')
 	//.option('--render-every <number>', "set this to 2 to render every other frame, 3 to render every third, etc", 1)
 	//.option('-q, --quality <number>', 'output quality, from 0-10 or something')
@@ -116,7 +119,7 @@ if ( program.replays )
 //console.log(replays);
 
 replays.unshift(recUri); // set recUri as first replay
-var shirts = [];
+var shirts = []; // doesn't seem to be implemented yet in the recplayer project... but might be an idea anyway to have separate folders for lgrs, bikes and shirts, being able to choose each from cmd
 
 for (var i=0; i<replays.length; i++){
 	var uri = replays[i];
@@ -203,7 +206,7 @@ function cropCanvas(requestedWidth, requestedHeight){
 	player.drawFrame(croppingCanvasContext, 0, 0, croppingCanvas.width, croppingCanvas.height, startingFrame);
 	var bbox = canvasPixelBoundingBox(croppingCanvas, croppingCanvasContext); // init with first frame
 
-	for (var i=startingFrame+1; i<=endingFrame && i<=replay.frameCount; i++)
+	for (var i=startingFrame+1; i<=endingFrame; i++)
 	{
 		player.drawFrame(croppingCanvasContext, 0, 0, croppingCanvas.width, croppingCanvas.height, i);
 		bbox = canvasPixelBoundingBox(croppingCanvas, croppingCanvasContext, bbox);
@@ -266,7 +269,7 @@ function writeGif(){
 	encoder.setQuality(quality); // image quality. 10 is default.
 	if (lgrName == 'transparent') encoder.setTransparent("black"); // transparency goes black without this -- https://github.com/eugeneware/gifencoder/blob/master/lib/GIFEncoder.js
 
-	for (var i=startingFrame; i<=endingFrame && i<=replay.frameCount; i++)
+	for (var i=startingFrame; i<=endingFrame; i++)
 	{
 		// draw: function(canv, x, y, w, h, onlyMaybe)
 		// pl.draw(canvas, 0, 0, canvase.width, canvase.height, true); // from https://maxdamantus.github.io/recplay/amd.js
@@ -291,7 +294,7 @@ function writePng(){
 	var containerCanvas = new createCanvas(canvas.width * cols, canvas.height * rows);
 	var containerCanvasContext = containerCanvas.getContext('2d');
 
-	for (var frame=startingFrame; frame<=endingFrame && frame<=replay.frameCount; frame++)
+	for (var frame=startingFrame; frame<=endingFrame; frame++)
 	{
 		var i = frame-startingFrame;
 		row = Math.floor( i/ cols );
@@ -315,7 +318,7 @@ function writePngs(){
 	//if ( outputUri.endsWith('/') ) outputUriPattern = outputUri + path.parse(levUri).name + '*.png';
 	var frameDigits = ("" + endingFrame).length; // max number of digits of frames
 	//console.log(endingFrame, frameDigits);
-	for (var frame=startingFrame; frame<=endingFrame && frame<=replay.frameCount; frame++)
+	for (var frame=startingFrame; frame<=endingFrame; frame++)
 	{
 		player.drawFrame(canv, 0, 0, width, height, frame);
 		// https://github.com/Automattic/node-canvas
@@ -338,3 +341,5 @@ if (output_filetype.toLowerCase() == 'gif') writeGif();
 else if (output_filetype.toLowerCase() == 'png') writePng();
 else if (output_filetype.toLowerCase() == 'pngs') writePngs();
 console.timeEnd("Whole Script Time");
+
+}

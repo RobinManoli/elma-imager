@@ -1,7 +1,7 @@
 {
   "name": "elma-imager",
   "version": "0.0.0",
-  "description": "Elasto Mania replay interpreter/renderer in JS",
+  "description": "Elasto Mania image creator, .png and .gif",
   "devDependencies": {
     "browserify": "^16.5.1"
   },
@@ -19,6 +19,13 @@
     "canvas": "^2.6.1",
     "commander": "^5.1.0",
     "gifencoder": "^2.0.1",
-    "glob": "^7.1.6"
-  }
+    "glob": "^7.1.6",
+    "pkg": "^4.4.9"
+  },
+
+	"main": "imageWriter.js",
+	"bin": "bin.js", 
+	"pkg": {
+		"scripts": ["levReader.js", "levRender.js", "recReader.js", "recRender.js", "player.js"]
+	}
 }
