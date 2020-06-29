@@ -1,5 +1,5 @@
 {
-  "name": "elma-rechandler",
+  "name": "elma-imager",
   "version": "0.0.0",
   "description": "Elasto Mania replay interpreter/renderer in JS",
   "devDependencies": {
@@ -7,16 +7,17 @@
   },
   "scripts": {
     "amd-fake": "browserify amd-fake.js -o amd.js",
-    "image": "node imageWriter.js"
+    "img": "node imageWriter.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RobinManoli/elma-rechandler.git"
+    "url": "git+https://github.com/RobinManoli/elma-imager.git"
   },
   "author": "RobinManoli",
   "license": "ISC",
   "dependencies": {
     "canvas": "^2.6.1",
+    "commander": "^5.1.0",
     "gifencoder": "^2.0.1"
   }
 }

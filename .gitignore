@@ -5,3 +5,7 @@ npm-debug.log
 .DS_Store
 
 image_output/*
+lev/*
+rec/*
+
+!image_output/29be420_z1_transparent.gif
