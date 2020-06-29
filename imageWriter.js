@@ -3,6 +3,7 @@ console.time("Whole Script Time");
 
 const path = require('path');
 var fs = require("fs");
+var glob = require("glob")
 const { createCanvas, loadImage, Image } = require('canvas')
 const { program } = require('commander');
 
@@ -19,7 +20,7 @@ var Player = require("./player");
 
 // https://www.npmjs.com/package/commander#options
 program
-	.requiredOption('-r, --rec <pattern>', 'path and filename for replays to render, for example elmapath/rec/myrec.rec, or elmapath/rec/warmup*.rec') // not required if creating option to only render lev, using transparent bike
+	.requiredOption('-r, --rec <pattern>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
 	.requiredOption('-l, --lev <name>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
 	.option('-o, --output <pattern>', 'output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/', '')
 	.option('-w, --width <number>', 'width of output frame (integer)', 0)
@@ -28,9 +29,11 @@ program
 	.option('-g, --lgr <name>', 'default or transparent', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
 	.option('-s, --start <number>', 'starting frame (integer), or time in seconds (float, such as 1.0)', '0')
 	.option('-e, --end <number>', 'ending frame (integer), or time in seconds (float, such as 65.0)', '999999')
+	.option('-R, --replays <pattern>', 'path and filename for extra replays to render, for example elmapath/rec/29*.rec')
 	.option('-d, --delay <number>', 'delay in milliseconds between displaying each frame in .gif', 33)
 	.option('-D, --debug', 'debug output')
 	//.option('--shirt <name>', 'path and filename for shirt to use, elmapath/bmp/nickname.bmp')
+	//.option('-Z --zoom-fit', 'fill level inside output frame')
 	//.option('--render-every <number>', "set this to 2 to render every other frame, 3 to render every third, etc", 1)
 	//.option('-q, --quality <number>', 'output quality, from 0-10 or something')
 	//.option('-y, --yes', 'yes to all, ie force action to happen')
@@ -96,12 +99,35 @@ var lgr = Lgr.make("img/" + lgrName, function(){
 // var pl = player.make(levRn.reader(lev), pllgr, mkCanv); // from https://maxdamantus.github.io/recplay/amd.js
 var player = Player.make(LevReader.reader(lev), lgr, mkCanv);
 
-var rec = fs.readFileSync(recUri, 'binary');
+var longestReplay = 0;
+var replay; // focused replay or only replay if any
+var replays = [];
+var globOptions = {}; // https://www.npmjs.com/package/glob
+
+if ( program.replays )
+{
+	replays = glob.sync(program.replays, globOptions);
+	var recUriAsGlobList = glob.sync(recUri, globOptions); // get recUri in the same format as glob uses, since if recUri might have backslashes and replays not
+	replays = replays.filter( function( el ) {
+		// remove recUri from replays, if it's there, since it should only be at the beginning, set below
+		return recUriAsGlobList.indexOf( el ) < 0;
+	});
+}
+//console.log(replays);
+
+replays.unshift(recUri); // set recUri as first replay
 var shirts = [];
-var replay = player.addReplay(RecReader.reader(rec), shirts);
-if (endingFrame > replay.frameCount) endingFrame = replay.frameCount;
+
+for (var i=0; i<replays.length; i++){
+	var uri = replays[i];
+	var rec = fs.readFileSync(uri, 'binary');
+	var _replay = player.addReplay(RecReader.reader(rec), shirts);
+	if (uri == recUri) replay = _replay;
+	longestReplay = Math.max( longestReplay, _replay.frameCount );
+}
+if (endingFrame > longestReplay) endingFrame = longestReplay;
 var framesToRender = endingFrame - startingFrame + 1;
-//console.log(replay);
+//console.log(startingFrame, endingFrame, framesToRender, replay);
 
 // get x,y values of the furthermost pixels in all directions -- only works with transparent lgr
 // https://stackoverflow.com/a/23256220
@@ -224,7 +250,7 @@ function renderFilename( outputUri ){
 		var _recUri = recUri.replace('*', '');
 		result = result.replace('%rec', path.parse(_recUri).name);
 	}
-	console.log( "Resulting filename: " + result);
+	//console.log( "Resulting filename: " + result);
 	return result;
 }
 

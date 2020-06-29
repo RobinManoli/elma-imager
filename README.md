@@ -70,28 +70,31 @@ npm run img -- -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/
 
 
 ### Multiple recs
-Below will render all recs with a filename starting with ```29```, starting from frame 10 (instead of frame 0) and process until frame 100, rendering 640x480 pixels.
-To make sure you will render the correct recs, you can first the the output with ```dir 29*.rec``` (Windows) or ```ls 29*.rec```.
+When you render multiple replays, the regular ```-r myreplay.rec``` will be rendered normally, and will be in the center. You can then add other replays to be rendered, though they will not be centered.
+
+Below will render all .rec files starting with ```29```, starting from frame 10 (instead of frame 0) and process until frame 100, rendering 640x480 pixels.
+To make sure you will render the correct recs, you can first check the output with ```dir elmapath/rec/29*.rec``` (Windows) or ```ls elmapath/rec/29*.rec```.
 ```sh
-npm run img -- -r elmapath/rec/29*.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -w 640 -h 480 -s 10 -e 100
+npm run img -- -r elmapath/rec/29main.rec -R elmapath/rec/29*.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -w 640 -h 480 -s 10 -e 100
 ```
 
 
 ### Cli Options
 These are the available command line options:
 ```
- -r, --rec <pattern>     path and filename for replays to render, for example elmapath/rec/myrec.rec, or elmapath/rec/warmup*.rec
-  -l, --lev <name>        path and filename for level to render, for example elmapath/lev/mylev.lev
-  -o, --output <pattern>  output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/ (default: "")
-  -w, --width <number>    width of output frame (integer) (default: 0)
-  -h, --height <number>   height of output frame (integer) (default: 0)
-  -z, --zoom <number>     float, use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in (default: 1)
-  -g, --lgr <name>        default or transparent (default: "default")
-  -s, --start <number>    starting frame (integer), or time in seconds (float, such as 1.0) (default: "0")
-  -e, --end <number>      ending frame (integer), or time in seconds (float, such as 65.0) (default: "999999")
-  -d, --delay <number>    delay in milliseconds between displaying each frame in .gif (default: 33)
-  -D, --debug             debug output
-  --help                  display help for command
+  -r, --rec <pattern>      path and filename for main replay to render, for example elmapath/rec/myrec.rec
+  -l, --lev <name>         path and filename for level to render, for example elmapath/lev/mylev.lev
+  -o, --output <pattern>   output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/ (default: "")
+  -w, --width <number>     width of output frame (integer) (default: 0)
+  -h, --height <number>    height of output frame (integer) (default: 0)
+  -z, --zoom <number>      float, use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in (default: 1)
+  -g, --lgr <name>         default or transparent (default: "default")
+  -s, --start <number>     starting frame (integer), or time in seconds (float, such as 1.0) (default: "0")
+  -e, --end <number>       ending frame (integer), or time in seconds (float, such as 65.0) (default: "999999")
+  -R, --replays <pattern>  path and filename for extra replays to render, for example elmapath/rec/29*.rec
+  -d, --delay <number>     delay in milliseconds between displaying each frame in .gif (default: 33)
+  -D, --debug              debug output
+  --help                   display help for command
 ```
 
 

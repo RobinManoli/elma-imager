@@ -125,7 +125,7 @@ exports.make = function(levRd, lgr, makeCanvas){
 	function setZoom(n){
 		zoom = n;
 		setRef();
-		console.log(n);
+		//console.log(n);
 		return zoom = n;
 	}
 

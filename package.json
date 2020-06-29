@@ -18,6 +18,7 @@
   "dependencies": {
     "canvas": "^2.6.1",
     "commander": "^5.1.0",
-    "gifencoder": "^2.0.1"
+    "gifencoder": "^2.0.1",
+    "glob": "^7.1.6"
   }
 }
