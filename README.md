@@ -10,12 +10,18 @@ Tool for creating images from recs, based on Maxdamantus' recplayer.
 ![0lp31.gif](https://github.com/RobinManoli/elma-imager/blob/master/image_output/0lp31.gif?raw=true)
 
 ## Install
-- Install npm
 - Download elma-imager (download all files and folders as .zip and then unzip, or clone with git): https://github.com/RobinManoli/elma-imager
-- Install dependencies with the commands below
+
+### Build
+- Install NPM
 ```sh
 cd elma-imager
 npm install
+pkg .
+```
+You can now run commands slower using:
+```sh
+npm run img -- -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png
 ```
 
 

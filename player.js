@@ -298,6 +298,7 @@ exports.make = function(levRd, lgr, makeCanvas){
 				var sec = pad(2, t%60); t = Math.floor(t/60);
 				// OSD
 				//canv.fillText(t + ":" + sec + "." + csec, 10, 12*2);
+				canv.fillText(frame, 10, 12*2);
 				//canv.fillText(replays[0].objRn.applesTaken(frame) + "/" + replays[0].objRn.appleCount(), 10, 12*3);
 //				canv.fillText(arrow(replays[0].objRn.gravity(frame, 0)), 10, 12*4);
 				//canv.fillRect(w*frame/replays[0].frameCount - 2.5, 0, 5, 12);

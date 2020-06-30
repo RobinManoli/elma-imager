@@ -257,6 +257,13 @@ function renderFilename( outputUri ){
 	return result;
 }
 
+// for an unknown reason some recs fail, but it works with this hack to recreate the canvas
+function recreateCanvas(i){
+	canvas = new createCanvas(width, height);
+	canv = canvas.getContext("2d");
+}
+
+
 function writeGif(){
 	var _outputUri = renderFilename(outputUri);
 	// https://github.com/eugeneware/gifencoder
@@ -275,6 +282,8 @@ function writeGif(){
 		// pl.draw(canvas, 0, 0, canvase.width, canvase.height, true); // from https://maxdamantus.github.io/recplay/amd.js
 		//player.draw(canv, 0, 0, canvas.width, canvas.height, true);
 		//function drawFrame(canv, x, y, w, h, frame)
+		//console.log(player);
+		recreateCanvas(i);
 		player.drawFrame(canv, 0, 0, canvas.width, canvas.height, i);
 		encoder.addFrame(canv);
 	}
@@ -299,6 +308,7 @@ function writePng(){
 		var i = frame-startingFrame;
 		row = Math.floor( i/ cols );
 		col = i % cols;
+		recreateCanvas(i);
 		player.drawFrame(canv, 0, 0, width, height, frame);
 		containerCanvasContext.drawImage(canvas, width*col, width*row);
 	}
@@ -320,6 +330,7 @@ function writePngs(){
 	//console.log(endingFrame, frameDigits);
 	for (var frame=startingFrame; frame<=endingFrame; frame++)
 	{
+		recreateCanvas(i);
 		player.drawFrame(canv, 0, 0, width, height, frame);
 		// https://github.com/Automattic/node-canvas
 		buf = canvas.toBuffer(); // mimeType can be set to image/png, image/jpeg -- png is default
