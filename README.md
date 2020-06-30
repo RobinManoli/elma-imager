@@ -1,6 +1,6 @@
 # Elma Imager
 <!-- markdown editor: https://dillinger.io/ -->
-Tool for creating images from recs, based on Maxdamantus' recplayer.
+Tool for creating images from replays and levels, based on Maxdamantus' recplayer.
 
 - Writes gifs, png sequences, and even sprite sheets. Transparent background or your chosen lgr (if you make transparent .png files from it).
 - Makes the process of creating videos much easier than before.
@@ -72,7 +72,7 @@ You can also render a level as an animated .gif. To do that, you need a replay t
 ```sh
 elma-imager-win.exe -r rec/myrec.rec -l lev/mylev.lev -o path/mylevel.gif -w 640 -h 480 -Z -e 2.5 -k transparent_kuski -S img\transparent_kuski\q1body.png
 ```
-
+![headbanger.png](https://github.com/RobinManoli/elma-imager/blob/master/image_output/headbanger.png?raw=true)
 
 ### Transparency
 Normally the kuski, food, killers and flowers are visible. All other images inside ```elma-imager/img/transparent``` are just a transparent pixel.
