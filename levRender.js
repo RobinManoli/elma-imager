@@ -490,6 +490,7 @@ exports.renderer = function levRender(reader, lgr){
 				canv.translate(-x, 0);
 				img.repeat(canv, w + img.width, h);
 			canv.restore();
-		}
+		},
+		bounds: () => ({ minX, minY, maxX, maxY })
 	};
 };

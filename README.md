@@ -5,7 +5,7 @@ Tool for creating images from recs, based on Maxdamantus' recplayer.
 - Writes gifs, png sequences, and even sprite sheets. Transparent background or your chosen lgr (if you make transparent .png files from it).
 - Makes the process of creating videos much easier than before.
 - Single or multiple recs
-- Also comes with the fully functional recplayer WITH images! Works without even installing NPM, locally. Just open index.html.
+- Also comes with the fully functional recplayer WITH images! Works without even installing NPM, locally. Just open index.html. However, this is not up to date with the project.
 
 ![0lp31.gif](https://github.com/RobinManoli/elma-imager/blob/master/image_output/0lp31.gif?raw=true)
 
@@ -19,7 +19,7 @@ cd elma-imager
 npm install
 pkg .
 ```
-You can now run commands slower using:
+You can now run commands (slower) using:
 ```sh
 npm run img -- -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png
 ```
@@ -54,12 +54,23 @@ elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o mypro
 ```
 
 
-### Create a .gif from a .rec:
+### Create a .gif from a .rec
 This might be slow, especially if you use ```-g transparent``` - so it's good to start out using small width, height and limited amount of frames. You don't have to use ```-s 0``` since starting from frame 0 is default.
 If you're having trouble with transparency and black colors, you might need to create .pngs and make the .gif with another tool.
 Below will create a .gif starting from frame 0 processing until frame 10, rendering 200x200 pixels.
 ```sh
 elma-imager-win.exe -r rec/myrec.rec -l lev/mylev.lev -o path/myrec.gif -s 0 -e 10 -w 200 -h 200
+```
+
+
+### Rendering only the level
+To render only the level, do not add any replay. You might want to fit the level to the image, using ```-Z```.
+```sh
+elma-imager-win.exe -l lev/mylev.lev -o path/mylevel.png -w 640 -h 480 -Z
+```
+You can also render a level as an animated .gif. To do that, you need a replay that is at least as long as your desired animation. Use the transparent_kuski lgr for kuski and shirt:
+```sh
+elma-imager-win.exe -r rec/myrec.rec -l lev/mylev.lev -o path/mylevel.gif -w 640 -h 480 -Z -e 2.5 -k transparent_kuski -S img\transparent_kuski\q1body.png
 ```
 
 
@@ -130,12 +141,18 @@ Results in something like:
 ```
 
 
-### Your Own LGR
+### Custom LGR
+There are some lgrs included, which you can try out. See the ```elma-imager/img``` folder. You have to set lgr, bike and shirt, unless you want the default lgr/bike/shirt to be rendered.
+Below the default lgr is used, but with player2's bike and body, and Spef's shirt (if you have converted it to a transparent .png and saved in the correct path).
+```sh
+elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -g default -k default_kuski2 -S elmapath/png/spef.png
+```
 You can use any lgr you want, as long as you can get the graphics as transparent .png images. Make copy of ```elma-imager/img/default``` to ```elma-imager/img/mylgr``` and replace the images there - with the same filenames!
 Then use the -g option:
 ```sh
 elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -g mylgr
 ```
+You can also create an lgr with only the kuski graphics, if you will be using another lgr for the other graphics. See the folder ```elma-imager/img/default_kuski2```
 
 
 ### Your Own Shirt or Another Bike

@@ -1,6 +1,10 @@
 "use strict";
 
-var imgs = ["bike", "ground", "head", "sky", "susp1", "susp2", "wheel", "qfood1", "qfood2", "qkiller", "qexit", "q1body", "q1forarm", "q1leg", "q1thigh", "q1up_arm", "myshirt"];
+//var imgs = ["bike", "ground", "head", "sky", "susp1", "susp2", "wheel", "qfood1", "qfood2", "qkiller", "qexit", "q1body", "q1forarm", "q1leg", "q1thigh", "q1up_arm", "myshirt"];
+var imgs = ["ground", "sky", "qfood1", "qfood2", "qkiller", "qexit"];
+var kuski_imgs = ["bike", "head", "susp1", "susp2", "wheel", "q1forarm", "q1leg", "q1thigh", "q1up_arm"];
+var shirt_img = "q1body";
+
 var picts = [
 	["qgrass","text",400,"s"],
 	["qdown_1","pict",400,"s"],
@@ -95,7 +99,9 @@ function borders(mkCanv, img, up){
 	return o;
 }
 
-exports.make = function(path, mkImage, mkCanv){
+//exports.make = function(path, mkImage, mkCanv){ // breaking change
+exports.make = function(path, kuskipath, shirtpathfilename, mkImage, mkCanv){
+
 	var r = { _ident: {}, picts: {}, lazy: lazy };
 
 	var numLoading = 0;
@@ -225,6 +231,12 @@ exports.make = function(path, mkImage, mkCanv){
 	imgs.forEach(function(i){
 		r[i] = lazy_(path + "/" + i + ".png", i);
 	});
+
+	kuski_imgs.forEach(function(i){
+		r[i] = lazy_(kuskipath + "/" + i + ".png", i);
+	});
+
+	r[shirt_img] = lazy_(shirtpathfilename, shirt_img);
 
 	var grassUp = [], grassDown = [], grassUpCount = 0, grassDownCount = 0;
 

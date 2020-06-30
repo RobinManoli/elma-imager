@@ -22,21 +22,21 @@ module.exports = function(process) {
 
 // https://www.npmjs.com/package/commander#options
 program
-	.requiredOption('-r, --rec <pathfilename>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
 	.requiredOption('-l, --lev <pathfilename>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
+	.option('-r, --rec <pathfilename>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
 	.option('-o, --output <pattern>', 'output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/', '')
 	.option('-w, --width <number>', 'width of output frame', 0)
 	.option('-h, --height <number>', 'height of output frame', 0)
 	.option('-z, --zoom <number>', 'float, use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in', 1)
-	.option('-g, --lgr <name>', 'folder inside elma-imager/img with lgr images', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
+	.option('-Z --zoom-fit', "fill level inside output frame, and don't center on kuski")
+	.option('-g, --lgr <name>', 'folder inside elma-imager/img with transparent .png lgr images, for rendering everything except the kuski', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
+	.option('-k, --kuski <name>', 'folder inside elma-imager/img with transparent .png lgr images for rendering kuski', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
+	.option('-S, --shirt <name>', 'path and filename for transparent .png shirt to use, elmapath/png/nickname.png', 'img/default/q1body.png')
 	.option('-s, --start <number>', 'starting frame (integer), or time in seconds (float, such as 1.0)', '0')
 	.option('-e, --end <number>', 'ending frame (integer), or time in seconds (float, such as 65.0)', '999999')
 	.option('-R, --replays <pattern>', 'path and filename for extra replays to render, for example elmapath/rec/29*.rec')
 	.option('-d, --delay <number>', 'delay in milliseconds between displaying each frame in .gif', 33)
 	.option('-D, --debug', 'debug output')
-	//.option('--shirt <name>', 'path and filename for shirt to use, elmapath/bmp/nickname.bmp')
-	//.option('-b --bike <name>', 'path for bike to use, for example elmapath/img/player1')
-	//.option('-Z --zoom-fit', 'fill level inside output frame')
 	//.option('--render-every <number>', "set this to 2 to render every other frame, 3 to render every third, etc", 1)
 	//.option('-q, --quality <number>', 'output quality, from 0-10 or something')
 	//.option('-y, --yes', 'yes to all, ie force action to happen')
@@ -55,6 +55,15 @@ if (!program.lev && program.lgr != 'transparent'){
 	process.exit();
 }
 */
+
+// if no rec is supplied, use transparent kuski
+if (!program.rec){
+	program.rec = 'rec/min.rec';
+	program.kuski = 'transparent_kuski';
+	program.shirt = 'img/transparent_kuski/q1body.png';
+	program.start = '0';
+	program.end = '0';
+}
 
 // process cmd options
 var recUri = program.rec;
@@ -94,7 +103,7 @@ function mkCanv(w, h){
 }
 
 var lev = fs.readFileSync(levUri, 'binary');
-var lgr = Lgr.make("img/" + lgrName, function(){
+var lgr = Lgr.make("img/" + lgrName, "img/" + program.kuski, program.shirt, function(){
 	//return document.createElement("img"); // from https://maxdamantus.github.io/recplay/amd.js
 	return new Image();
 }, mkCanv );
@@ -244,6 +253,8 @@ function renderFilename( outputUri ){
 	result = result.replace('%start', program.start);
 	result = result.replace('%end', program.end.includes('.') ? program.end: endingFrame );
 	result = result.replace('%lgr', program.lgr);
+	result = result.replace('%kuski', program.kuski);
+	result = result.replace('%shirt', path.parse(program.shirt).name);
 	result = result.replace('%zoom', program.zoom);
 	result = result.replace('%delay', program.delay);
 	result = result.replace('%frames', framesToRender);
@@ -346,7 +357,9 @@ cropCanvas(width, height);
 var canvas = new createCanvas(width, height);
 var canv = canvas.getContext("2d");
 player.drawFrame(canv, 0, 0, width, height, 0); // first frame drawing has weird sky placement, so do this before writing anything
-player.setScale( zoom );
+if ( program.zoomFit ) player.fitLev();
+else player.setScale( zoom );
+
 
 if (output_filetype.toLowerCase() == 'gif') writeGif();
 else if (output_filetype.toLowerCase() == 'png') writePng();

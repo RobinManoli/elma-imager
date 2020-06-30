@@ -31,6 +31,7 @@ exports.make = function(levRd, lgr, makeCanvas){
 
 	var zoom; // scale = 0.8^zoom, of Elma units, where 1 Elma unit is 48 px
 	var speed; // where 1 is normal speed, -1 is reversed
+	var bounds;
 
 	var defaultObjRn; // for when not spying
 
@@ -68,6 +69,7 @@ exports.make = function(levRd, lgr, makeCanvas){
 
 		zoom = 0;
 		speed = 1;
+		bounds = null;
 
 		defaultObjRn = objRnd.renderer(levRd);
 	}
@@ -84,7 +86,8 @@ exports.make = function(levRd, lgr, makeCanvas){
 				offsX: 0, offsY: 0,
 				// hack! Firefox seems to perform a lot better without the cache
 				// suspect it has to do with the offscreen antialiasing it's doing
-				levRn: levRn.cached(4, makeCanvas)
+				levRn: levRn.cached(4, makeCanvas),
+				scaleFac: 1
 			};
 		return viewports[n];
 	}
@@ -210,6 +213,24 @@ exports.make = function(levRd, lgr, makeCanvas){
 			viewports[z].offsX = viewports[z].offsY = 0;
 	}
 
+	function unfocus(){
+		focus = false;
+		invalidate = true;
+		resetViewports();
+	}
+
+	function fitLev(){
+		bounds = levRn.bounds();
+		setScale(1);
+		invalidate = true;
+		resetViewports();
+	}
+
+	function resetViewports(){
+		for(let z = 0; z < viewports.length; z++)
+			viewports[z].offsX = viewports[z].offsY = 0;
+	}
+
 	function playPause(){
 		playing = !playing;
 		setRef();
@@ -239,16 +260,25 @@ exports.make = function(levRd, lgr, makeCanvas){
 			canv.clip();
 
 			var centreX = vp.offsX, centreY = vp.offsY;
-			if(topRec){
+			if(bounds != null){
+				centreX += (bounds.maxX + bounds.minX)/2;
+				centreY += (bounds.maxY + bounds.minY)/2;
+				const bw = bounds.maxX - bounds.minX;
+				const bh = bounds.maxY - bounds.minY;
+				vp.scaleFac = Math.min(w/bw, h/bh)/48;
+			}
+			else if(topRec){
 				var lf = Math.min(frame, topRec.rd.frameCount() - 1);
 				centreX += topRec.rn.bikeXi(lf);
 				centreY -= topRec.rn.bikeYi(lf);
+				vp.scaleFac = 1;
 			}else{
 				centreX += startX;
 				centreY += startY;
+				vp.scaleFac = 1;
 			}
 
-			var escale = 48*getScale();
+			var escale = vp.scaleFac*48*getScale();
 			var ex = eround(centreX - w/escale/2), ey = eround(centreY - h/escale/2);
 			var ew = eround(w/escale), eh = eround(h/escale);
 
@@ -298,7 +328,7 @@ exports.make = function(levRd, lgr, makeCanvas){
 				var sec = pad(2, t%60); t = Math.floor(t/60);
 				// OSD
 				//canv.fillText(t + ":" + sec + "." + csec, 10, 12*2);
-				canv.fillText(frame, 10, 12*2);
+				//canv.fillText(frame, 10, 12*2);
 				//canv.fillText(replays[0].objRn.applesTaken(frame) + "/" + replays[0].objRn.appleCount(), 10, 12*3);
 //				canv.fillText(arrow(replays[0].objRn.gravity(frame, 0)), 10, 12*4);
 				//canv.fillRect(w*frame/replays[0].frameCount - 2.5, 0, 5, 12);
@@ -364,7 +394,10 @@ exports.make = function(levRd, lgr, makeCanvas){
 		},
 
 		changeFocus: changeFocus,
+		resetViewports: resetViewports,
 
+		unfocus: unfocus,
+		fitLev: fitLev,
 		setSpeed: setSpeed,
 		setScale: setScale,
 		setZoom: setZoom,

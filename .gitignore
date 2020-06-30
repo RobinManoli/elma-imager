@@ -6,6 +6,8 @@ image_output/*
 lev/*
 rec/*
 
+!rec/min.rec
+
 !image_output/29be420_z1_transparent.gif
 !image_output/0lp31.gif
 
@@ -18,9 +20,4 @@ node_modules/canvas/build/*
 node_modules/canvas/build/Release/*
 !node_modules/canvas/build/Release/canvas.node
 
-
-application/*
-!application/language/
-
-application/language/*
-!application/language/gr/
+util/recplay
