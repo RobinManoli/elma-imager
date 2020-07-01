@@ -76,19 +76,19 @@ elma-imager-win.exe -r rec/myrec.rec -l lev/mylev.lev -o path/mylevel.gif -w 640
 ![headbanger.png](https://github.com/RobinManoli/elma-imager/blob/master/image_output/headbanger.png?raw=true)
 
 ### Transparency
-Normally the kuski, food, killers and flowers are visible. You can anything you want transparent, using or editing the transparent lgr.
+You can make anything you want transparent, using or editing the transparent folder.
 - All images inside the transparent lgr folder ```elma-imager/img/transparent``` are just a transparent pixel.
 - Transparent .gifs and finding edges (cropping) only works using ```-g transparent``` (or excluding -l and -g), but you can edit this folder according to your needs.
-- If you want to render any other image, copy it as a .png from your desired lgr, and copy it to ```elma-imager/img/transparent```
+- If you want to render any other image (for example an object), but still use cropping or create a .gif with transparency, copy the image as a .png from your desired lgr, and copy it to ```elma-imager/img/transparent```
 - You can check ```elma-imager/img/default``` to see what images the filenames represent. The filenames are the same as in ```elma-imager/img/transparent```.
-- If you later want to stop render something using the transparent lgr, copy one of the transparent pixel images inside ```elma-imager/img/transparent``` and rename it to the thing you now want to be transparent.
+- If you later want to stop render something using the transparent lgr, and make that thing transparent again, copy one of the transparent pixel images inside ```elma-imager/img/transparent``` and rename it to the thing you now want to be transparent.
 - Transparency can render slowly if you don't set the width and height, because it first renders with a large frame to find the edges. The output will not be cut exactly at the edges, but instead with the kuski in the center.
 
 Below will start from frame 10 and process until frame 20, cropping near the edges.
 ```sh
-elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -s 10 -e 20 -g transparent
+elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -s 10 -e 20 -g transparent -k default
 ```
-A shortcut for this is to exclude the -l and -g options, which makes elma-imager understand that the level should be transparent:
+A shortcut for this is to exclude the -l and -g options, which makes elma-imager understand that the level should be transparent. Since no -k option is used in this shortcut, default will be used:
 ```sh
 elma-imager-win.exe -r elmapath/rec/myrec.rec -o myproject/path/myrec*.png -s 10 -e 20
 ```
@@ -104,6 +104,7 @@ elma-imager-win.exe -r elmapath/rec/29main.rec -R elmapath/rec/29*.rec -l elmapa
 
 
 ### Cli Options
+```
 These are the available command line options:
   -l, --lev <pathfilename>  path and filename for level to render, for example elmapath/lev/mylev.lev
   -r, --rec <pathfilename>  path and filename for main replay to render, for example elmapath/rec/myrec.rec
@@ -173,7 +174,7 @@ Note that if you use multiple replays for the same output they will all use the 
 If you don't use the asterisk symbol * in the -o output option the .png will be a sprite map instead of a sequence of images.
 You shouldn't use the options -l --lev, -w --width, or -h --height here, so that the edges will be set automatically.
 Unless you have rendered a version of this .rec before and know the width and height. Then just exclude -l level and set -w and -h.
-This can be slow, because it first renders with a large frame to find the edges. The output will not be cut exactly at the edges, but instead with the kuski in the center.
+Finding edges can be slow, because the program first renders a sequence of large frames. The output will not be cut exactly at the edges, but instead with the kuski in the center.
 ```sh
 elma-imager-win.exe -r elmapath/rec/myrec.rec -o myproject/path/myrec.png -s 10 -e 100
 ```
