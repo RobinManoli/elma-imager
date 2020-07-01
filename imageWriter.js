@@ -18,20 +18,20 @@ var RecReader = require("./recReader");
 var Lgr = require("./lgr");
 var Player = require("./player");
 
-module.exports = function(process) {
+module.exports = function() {
 
 // https://www.npmjs.com/package/commander#options
 program
-	.requiredOption('-l, --lev <pathfilename>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
+	.option('-l, --lev <pathfilename>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
 	.option('-r, --rec <pathfilename>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
 	.option('-o, --output <pattern>', 'output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/', '')
 	.option('-w, --width <number>', 'width of output frame', 0)
 	.option('-h, --height <number>', 'height of output frame', 0)
-	.option('-z, --zoom <number>', 'float, use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in', 1)
-	.option('-Z --zoom-fit', "fill level inside output frame, and don't center on kuski")
-	.option('-g, --lgr <name>', 'folder inside elma-imager/img with transparent .png lgr images, for rendering everything except the kuski', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
-	.option('-k, --kuski <name>', 'folder inside elma-imager/img with transparent .png lgr images for rendering kuski', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
-	.option('-S, --shirt <name>', 'path and filename for transparent .png shirt to use, elmapath/png/nickname.png', 'img/default/q1body.png')
+	.option('-z, --zoom <number>', 'use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in', 1)
+	.option('-Z, --zoom-fit', "fill level inside output frame, and don't center on kuski")
+	.option('-g, --lgr <name>', 'folder name inside elma-imager/img with .png images for rendering all graphics', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
+	.option('-k, --kuski <name>', 'folder name inside elma-imager/img with .png images for rendering kuski') // add across, matrix, rec-circles (rendered when images don't exit)
+	.option('-S, --shirt <name>', 'path and filename for .png shirt to use, for example elmapath/png/nickname.png')
 	.option('-s, --start <number>', 'starting frame (integer), or time in seconds (float, such as 1.0)', '0')
 	.option('-e, --end <number>', 'ending frame (integer), or time in seconds (float, such as 65.0)', '999999')
 	.option('-R, --replays <pattern>', 'path and filename for extra replays to render, for example elmapath/rec/29*.rec')
@@ -47,28 +47,33 @@ program
 program.parse(process.argv);
 if (program.debug) console.log(program.opts());
 
-/*
-// usable code if creating a default transparent.lev
-if (!program.lev && program.lgr != 'transparent'){
-	console.log("You need to provide a level unless you are using the transparent lgr.");
+if (!program.lev && !program.rec){
+	console.log("You need to provide a level or replay");
 	program.help();
 	process.exit();
 }
-*/
+
+if (!program.lev){
+	program.lev = 'lev/min.lev';
+	program.lgr = 'transparent';
+	if (!program.kuski) program.kuski = 'default';
+}
 
 // if no rec is supplied, use transparent kuski
 if (!program.rec){
 	program.rec = 'rec/min.rec';
-	program.kuski = 'transparent_kuski';
-	program.shirt = 'img/transparent_kuski/q1body.png';
+	program.kuski = 'transparent';
+	program.shirt = 'img/transparent/q1body.png';
 	program.start = '0';
 	program.end = '0';
 }
+if (!program.kuski) program.kuski = program.lgr;
+if (!program.shirt) program.shirt = 'img/' + program.kuski + '/q1body.png'
 
 // process cmd options
 var recUri = program.rec;
 var outputUri = program.output;
-var levUri = program.lev || 'transparent.lev';
+var levUri = program.lev;
 //var levFilename = levUri.split('/').pop(); // works whether levUri contains a / or not // handled by path
 var width = parseInt(program.width);
 var height = parseInt(program.height);
@@ -200,8 +205,9 @@ function cropCanvas(requestedWidth, requestedHeight){
 	{
 		return; // cropping not expected, so exit
 	}
-	else if ( lgrName != 'transparent' )
+	else if ( lgrName != 'transparent' || lgrName == program.kuski )
 	{
+		// if lgr is not transparent, or both lgr and kuski are transparent, do not crop
 		//console.log(lgr, "lgr not transparent, setting default width and height");
 		width = 200;
 		height = 200;
@@ -276,6 +282,7 @@ function recreateCanvas(i){
 
 
 function writeGif(){
+	console.log("Creating animated .gif...");
 	var _outputUri = renderFilename(outputUri);
 	// https://github.com/eugeneware/gifencoder
 	const GIFEncoder = require('gifencoder');
@@ -304,6 +311,7 @@ function writeGif(){
 
 // write a sprite sheet
 function writePng(){
+	console.log("Creating sprite sheet...");
 	// since this is the default output, use a default filename is none is supplied
 	var _outputUri = renderFilename( outputUri ? outputUri: 'image_output/%rec_%framesframes_w%width_h%height_s%start_e%end_z%zoom_%lgr.png' );
 	var buf;
@@ -313,6 +321,7 @@ function writePng(){
 	var col = 0, row = 0;
 	var containerCanvas = new createCanvas(canvas.width * cols, canvas.height * rows);
 	var containerCanvasContext = containerCanvas.getContext('2d');
+	//console.log(rows, cols, canvas.width, canvas.height);
 
 	for (var frame=startingFrame; frame<=endingFrame; frame++)
 	{
@@ -321,7 +330,8 @@ function writePng(){
 		col = i % cols;
 		recreateCanvas(i);
 		player.drawFrame(canv, 0, 0, width, height, frame);
-		containerCanvasContext.drawImage(canvas, width*col, width*row);
+		//console.log("drawing col, row, x, y:", col, row, width*col, height*row);
+		containerCanvasContext.drawImage(canvas, width*col, height*row);
 	}
 
 	player.drawFrame(canv, 0, 0, canvas.width, canvas.height, startingFrame);
@@ -333,6 +343,7 @@ function writePng(){
 }
 
 function writePngs(){
+	console.log("Creating sequence of .pngs...");
 	var buf, _outputUri;
 	outputUri = renderFilename(outputUri);
 

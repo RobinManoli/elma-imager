@@ -7,7 +7,7 @@
   },
   "scripts": {
     "amd-fake": "browserify amd-fake.js -o amd.js",
-    "img": "node bin.js"
+    "img": "node elma-imager.js"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
   },
 
 	"main": "imageWriter.js",
-	"bin": "bin.js", 
+	"bin": "elma-imager.js", 
 	"pkg": {
 		"scripts": ["levReader.js", "levRender.js", "recReader.js", "recRender.js", "player.js", "node_modules/canvas/lib/*.js"]
 	}
