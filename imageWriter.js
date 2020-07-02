@@ -18,6 +18,8 @@ var RecReader = require("./recReader");
 var Lgr = require("./lgr");
 var Player = require("./player");
 
+var RecHandler = require("./recHandler");
+
 module.exports = function() {
 
 // https://www.npmjs.com/package/commander#options
@@ -36,6 +38,7 @@ program
 	.option('-e, --end <number>', 'ending frame (integer), or time in seconds (float, such as 65.0)', '999999')
 	.option('-R, --replays <pattern>', 'path and filename for extra replays to render, for example elmapath/rec/29*.rec')
 	.option('-d, --delay <number>', 'delay in milliseconds between displaying each frame in .gif', 33)
+	.option('-C, --capture-framerate <number>', "experimental - by default .rec files are captured in 30 fps, which you can change with this setting", 30)
 	.option('-D, --debug', 'debug output')
 	//.option('--render-every <number>', "set this to 2 to render every other frame, 3 to render every third, etc", 1)
 	//.option('-q, --quality <number>', 'output quality, from 0-10 or something')
@@ -137,8 +140,11 @@ var shirts = []; // doesn't seem to be implemented yet in the recplayer project.
 
 for (var i=0; i<replays.length; i++){
 	var uri = replays[i];
-	var rec = fs.readFileSync(uri, 'binary');
-	var _replay = player.addReplay(RecReader.reader(rec), shirts);
+	//var rec = fs.readFileSync(uri, 'binary');
+	var rec = RecHandler.toFramerate( uri, parseInt(program.captureFramerate) );
+	var readRec = RecReader.reader(rec);
+	//if (i == 0) console.log(readRec);
+	var _replay = player.addReplay(readRec, shirts);
 	if (uri == recUri) replay = _replay;
 	longestReplay = Math.max( longestReplay, _replay.frameCount );
 }
@@ -249,7 +255,7 @@ function cropCanvas(requestedWidth, requestedHeight){
 	width = requestedWidth > 0 ? requestedWidth: w;
 	height = requestedHeight > 0 ? requestedHeight: h;
 	console.timeEnd("Finding Edges Time");
-	console.log("Done. Processing output...");
+	console.log("Done: " + width + " x " + height + " pixels");
 }
 
 function renderFilename( outputUri ){

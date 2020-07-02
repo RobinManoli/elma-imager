@@ -4,7 +4,7 @@ Tool for creating images from replays and levels, based on Maxdamantus' recplaye
 
 - Writes gifs, png sequences, and even sprite sheets. The level or kuski can be transparent or your chosen lgr (if you make .png files with transparent background from it).
 - Makes the process of creating videos much easier than before.
-- Single or multiple recs
+- Create single or multiple recs, but only reads from single recs
 - Also comes with the fully functional recplayer WITH images! Works without even installing NPM, locally. Just open index.html. However, this is not up to date with the project.
 
 ![0lp31.gif](https://github.com/RobinManoli/elma-imager/blob/master/image_output/0lp31.gif?raw=true)
@@ -14,7 +14,7 @@ Tool for creating images from replays and levels, based on Maxdamantus' recplaye
 
 ### Build
 This is for reference only. You don't need to do this to install.
-- Install NPM
+- Install NPM (don't expect this to work)
 ```sh
 cd elma-imager
 npm install
@@ -104,24 +104,25 @@ elma-imager-win.exe -r elmapath/rec/29main.rec -R elmapath/rec/29*.rec -l elmapa
 
 
 ### Cli Options
-```
 These are the available command line options:
-  -l, --lev <pathfilename>  path and filename for level to render, for example elmapath/lev/mylev.lev
-  -r, --rec <pathfilename>  path and filename for main replay to render, for example elmapath/rec/myrec.rec
-  -o, --output <pattern>    output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/ (default: "")
-  -w, --width <number>      width of output frame (default: 0)
-  -h, --height <number>     height of output frame (default: 0)
-  -z, --zoom <number>       use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in (default: 1)
-  -Z, --zoom-fit            fill level inside output frame, and don't center on kuski
-  -g, --lgr <name>          folder name inside elma-imager/img with .png images for rendering all graphics (default: "default")
-  -k, --kuski <name>        folder name inside elma-imager/img with .png images for rendering kuski
-  -S, --shirt <name>        path and filename for .png shirt to use, for example elmapath/png/nickname.png
-  -s, --start <number>      starting frame (integer), or time in seconds (float, such as 1.0) (default: "0")
-  -e, --end <number>        ending frame (integer), or time in seconds (float, such as 65.0) (default: "999999")
-  -R, --replays <pattern>   path and filename for extra replays to render, for example elmapath/rec/29*.rec
-  -d, --delay <number>      delay in milliseconds between displaying each frame in .gif (default: 33)
-  -D, --debug               debug output
-  --help                    display help for command
+```
+  -l, --lev <pathfilename>          path and filename for level to render, for example elmapath/lev/mylev.lev
+  -r, --rec <pathfilename>          path and filename for main replay to render, for example elmapath/rec/myrec.rec
+  -o, --output <pattern>            output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/ (default: "")
+  -w, --width <number>              width of output frame (default: 0)
+  -h, --height <number>             height of output frame (default: 0)
+  -z, --zoom <number>               use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in (default: 1)
+  -Z, --zoom-fit                    fill level inside output frame, and don't center on kuski
+  -g, --lgr <name>                  folder name inside elma-imager/img with .png images for rendering all graphics (default: "default")
+  -k, --kuski <name>                folder name inside elma-imager/img with .png images for rendering kuski
+  -S, --shirt <name>                path and filename for .png shirt to use, for example elmapath/png/nickname.png
+  -s, --start <number>              starting frame (integer), or time in seconds (float, such as 1.0) (default: "0")
+  -e, --end <number>                ending frame (integer), or time in seconds (float, such as 65.0) (default: "999999")
+  -R, --replays <pattern>           path and filename for extra replays to render, for example elmapath/rec/29*.rec
+  -d, --delay <number>              delay in milliseconds between displaying each frame in .gif (default: 33)
+  -C, --capture-framerate <number>  experimental - by default .rec files are captured in 30 fps, which you can change with this setting (default: 30)
+  -D, --debug                       debug output
+  --help                            display help for command
 ```
 
 
@@ -147,6 +148,17 @@ elma-imager-win.exe -r elmapath/rec/29Spef.rec -l elmapath/lev/QWQUU029.lev -o m
 Results in something like:
 ```sh
 29Spef_QWQUU029_175frames_w300_h300_s0_e174_default.gif
+```
+
+
+### Capture Framerate (Experimental)
+Replays are recorded in 30 fps, but displayed in Elasto Mania at a higher framerate. This feature is experimental for now.
+The framerate cannot be any number, so it will be approximated from the input value.
+- If the framerate is less than 30, it will work with 15 (every other), 10 (every third), ~7 (every fourth), and so on.
+- If the framerate is larger than 30, it will work with 60 (factor 2), 90 (factor 3), 120 (factor 4), and so on.
+Below will capture with a framerate of 60.
+```sh
+elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -C 60
 ```
 
 

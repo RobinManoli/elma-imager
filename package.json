@@ -18,14 +18,22 @@
   "dependencies": {
     "canvas": "^2.6.1",
     "commander": "^5.1.0",
+    "elmajs": "^1.1.1",
     "gifencoder": "^2.0.1",
     "glob": "^7.1.6",
-    "pkg": "^4.4.9"
+    "pkg": "^4.4.9",
+    "temp-write": "^4.0.0"
   },
-
-	"main": "imageWriter.js",
-	"bin": "elma-imager.js", 
-	"pkg": {
-		"scripts": ["levReader.js", "levRender.js", "recReader.js", "recRender.js", "player.js", "node_modules/canvas/lib/*.js"]
-	}
+  "main": "imageWriter.js",
+  "bin": "elma-imager.js",
+  "pkg": {
+    "scripts": [
+      "levReader.js",
+      "levRender.js",
+      "recReader.js",
+      "recRender.js",
+      "player.js",
+      "node_modules/canvas/lib/*.js"
+    ]
+  }
 }
