@@ -1,8 +1,9 @@
 var fs = require("fs");
-const { Replay, Frame } = require('elmajs');
+const path = require('path');
+const { Replay, Frame, Level } = require('elmajs');
 const tempWrite = require('temp-write');
 
-exports.toFramerate= function(recUri, frameRate){
+exports.handle = function(recUri, frameRate, outputUri, scale, levUri){
 	var replayBuffer = fs.readFileSync(recUri);
 	var replay = Replay.from(replayBuffer);
 
@@ -10,6 +11,7 @@ exports.toFramerate= function(recUri, frameRate){
 	var frameStep = Math.round( 1/keptFrameRatio ); // if keptFrameRatio is 0.5 then this value will be 2, since 1 in two frames will remain
 	var frameMultiplier = Math.round( keptFrameRatio );
 	var player1 = replay.rides[0]; // the first player in replay
+	var framesBefore = player1.frames.length;
 
 	if (frameStep > 1) console.log("Capturing framerate: ~" + parseInt(30/frameStep) + ": 1 in " +frameStep+ " (approximated from option -C " +frameRate+ ")");
 	else if (frameMultiplier > 1) console.log("Capturing framerate: " + (30*frameMultiplier) + " (approximated from option -C " +frameRate+ ")");
@@ -63,11 +65,49 @@ exports.toFramerate= function(recUri, frameRate){
 	}
 	//console.log( replay.rides[0].frames[93].bikeRotation );
 
-	var recPath = tempWrite.sync('recpath');
-	var _recUri = tempWrite.sync('recpath', 'rec.rec');
-	
-	
+	var frameRateRatio = replay.rides[0].frames.length / framesBefore;
+	// update events according to new framerate
+	for (i=0; i<player1.events.length; i++)
+	{
+		replay.rides[0].events[i].time *= frameRateRatio;
+	}
+
+	if (!outputUri || !outputUri.endsWith('.rec'))
+	{
+		var recPath = tempWrite.sync('recpath');
+		var _recUri = tempWrite.sync('recpath', 'rec.rec');
+	}
+	else _recUri = outputUri;
+
+	if ( scale && scale != 1.0 )
+	{
+		for (i=0; i<replay.rides[0].frames.length; i++)
+		{
+			var frame = replay.rides[0].frames[i];
+			frame.bike.x *= scale;
+			frame.bike.y *= scale;
+			frame.leftWheel.x *= scale;
+			frame.leftWheel.y *= scale;
+			frame.rightWheel.x *= scale;
+			frame.rightWheel.y *= scale;
+			frame.head.x *= scale;
+			frame.head.y *= scale;
+			replay.rides[0].frames[i] = frame;
+		}
+	}
+
+	if (levUri)
+	{
+		// if a level is provided, make the written rec linked to that level
+		var levBuffer = fs.readFileSync(levUri);
+		var level = Level.from(levBuffer);
+		
+		replay.level = path.parse(levUri).base;
+		replay.link = level.link;
+		//console.log(replay, level);
+	}
 	fs.writeFileSync(_recUri, replay.toBuffer());
+	if (outputUri.endsWith('.rec'))	console.log( "Wrote " + outputUri + ": " + replay.rides[0].frames.length + " frames");
 	return fs.readFileSync(_recUri, 'binary'); // return changed rec
-	return fs.readFileSync(recUri, 'binary'); // return original rec, as before this was created
+	//return fs.readFileSync(recUri, 'binary'); // return original rec, as before this was created
 }

@@ -19,6 +19,7 @@ var Lgr = require("./lgr");
 var Player = require("./player");
 
 var RecHandler = require("./recHandler");
+var LevHandler = require("./levHandler");
 
 module.exports = function() {
 
@@ -26,7 +27,7 @@ module.exports = function() {
 program
 	.option('-l, --lev <pathfilename>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
 	.option('-r, --rec <pathfilename>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
-	.option('-o, --output <pattern>', 'output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/', '')
+	.option('-o, --output <pattern>', 'output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/replay*.png, path/myrec.rec, path/mylev.lev', '')
 	.option('-w, --width <number>', 'width of output frame', 0)
 	.option('-h, --height <number>', 'height of output frame', 0)
 	.option('-z, --zoom <number>', 'use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in', 1)
@@ -39,6 +40,8 @@ program
 	.option('-R, --replays <pattern>', 'path and filename for extra replays to render, for example elmapath/rec/29*.rec')
 	.option('-d, --delay <number>', 'delay in milliseconds between displaying each frame in .gif', 33)
 	.option('-C, --capture-framerate <number>', "experimental - by default .rec files are captured in 30 fps, which you can change with this setting", 30)
+	.option('--lev-scale <number>', "modding the level to a certain scale", 1.0)
+	.option('--rec-scale <number>', "modding the replay(s) to a certain scale (intentionally weird output, fitting a lev with a new scale)", 1.0)
 	.option('-D, --debug', 'debug output')
 	//.option('--render-every <number>', "set this to 2 to render every other frame, 3 to render every third, etc", 1)
 	//.option('-q, --quality <number>', 'output quality, from 0-10 or something')
@@ -50,6 +53,13 @@ program
 program.parse(process.argv);
 if (program.debug) console.log(program.opts());
 
+var output_filetype;
+if ( program.output.includes('*') ) output_filetype = 'pngs';
+else if ( program.output.toLowerCase().endsWith('.gif') ) output_filetype = 'gif';
+else if ( program.output.toLowerCase().endsWith('.rec') ) output_filetype = 'rec';
+else if ( program.output.toLowerCase().endsWith('.lev') ) output_filetype = 'lev';
+else output_filetype = 'png';
+
 if (!program.lev && !program.rec){
 	console.log("You need to provide a level or replay");
 	program.help();
@@ -58,7 +68,7 @@ if (!program.lev && !program.rec){
 
 if (!program.lev){
 	program.lev = 'lev/min.lev';
-	program.lgr = 'transparent';
+	if (output_filetype != 'rec') program.lgr = 'transparent';
 	if (!program.kuski) program.kuski = 'default';
 }
 
@@ -82,14 +92,11 @@ var width = parseInt(program.width);
 var height = parseInt(program.height);
 var delay = parseInt(program.delay);
 var zoom = parseFloat(program.zoom);
+var levScale = parseFloat(program.levScale) || 1.0;
+var recScale = parseFloat(program.recScale) || 1.0;
 var lgrName = program.lgr;
 // not yet implemented
 var quality = 10;
-
-var output_filetype;
-if ( program.output.includes('*') ) output_filetype = 'pngs';
-else if ( program.output.includes('.gif') ) output_filetype = 'gif';
-else output_filetype = 'png';
 
 var startingFrame, endingFrame;
 if ( program.start.includes('.') ) startingFrame = 30 * parseFloat(program.start);
@@ -110,7 +117,7 @@ function mkCanv(w, h){
 	return new createCanvas(w, h);
 }
 
-var lev = fs.readFileSync(levUri, 'binary');
+var lev = LevHandler.handle(levUri, outputUri, levScale); // fs.readFileSync(levUri, 'binary');
 var lgr = Lgr.make("img/" + lgrName, "img/" + program.kuski, program.shirt, function(){
 	//return document.createElement("img"); // from https://maxdamantus.github.io/recplay/amd.js
 	return new Image();
@@ -133,15 +140,15 @@ if ( program.replays )
 		return recUriAsGlobList.indexOf( el ) < 0;
 	});
 }
-//console.log(replays);
+//console.log(recUri, replays);
 
-replays.unshift(recUri); // set recUri as first replay
+if (recUri) replays.unshift(recUri); // set recUri as first replay
 var shirts = []; // doesn't seem to be implemented yet in the recplayer project... but might be an idea anyway to have separate folders for lgrs, bikes and shirts, being able to choose each from cmd
 
 for (var i=0; i<replays.length; i++){
 	var uri = replays[i];
 	//var rec = fs.readFileSync(uri, 'binary');
-	var rec = RecHandler.toFramerate( uri, parseInt(program.captureFramerate) );
+	var rec = RecHandler.handle( uri, parseInt(program.captureFramerate), outputUri, recScale, levUri );
 	var readRec = RecReader.reader(rec);
 	//if (i == 0) console.log(readRec);
 	var _replay = player.addReplay(readRec, shirts);
@@ -369,6 +376,8 @@ function writePngs(){
 	console.log( "Wrote " + outputUri + ": " + framesToRender + " files, " + width + " x " + height + " px");
 }
 
+// todo: stop here if not writing image
+
 cropCanvas(width, height);
 //console.log("creating canvas", width, height, zoom);
 var canvas = new createCanvas(width, height);
@@ -378,9 +387,9 @@ if ( program.zoomFit ) player.fitLev();
 else player.setScale( zoom );
 
 
-if (output_filetype.toLowerCase() == 'gif') writeGif();
-else if (output_filetype.toLowerCase() == 'png') writePng();
-else if (output_filetype.toLowerCase() == 'pngs') writePngs();
+if (output_filetype == 'gif') writeGif();
+else if (output_filetype == 'png') writePng();
+else if (output_filetype == 'pngs') writePngs();
 console.timeEnd("Whole Script Time");
 
 }

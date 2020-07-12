@@ -108,7 +108,7 @@ These are the available command line options:
 ```
   -l, --lev <pathfilename>          path and filename for level to render, for example elmapath/lev/mylev.lev
   -r, --rec <pathfilename>          path and filename for main replay to render, for example elmapath/rec/myrec.rec
-  -o, --output <pattern>            output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/ (default: "")
+  -o, --output <pattern>            output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/replay*.png, path/myrec.rec, path/mylev.lev (default: "")
   -w, --width <number>              width of output frame (default: 0)
   -h, --height <number>             height of output frame (default: 0)
   -z, --zoom <number>               use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in (default: 1)
@@ -121,6 +121,8 @@ These are the available command line options:
   -R, --replays <pattern>           path and filename for extra replays to render, for example elmapath/rec/29*.rec
   -d, --delay <number>              delay in milliseconds between displaying each frame in .gif (default: 33)
   -C, --capture-framerate <number>  experimental - by default .rec files are captured in 30 fps, which you can change with this setting (default: 30)
+  --lev-scale <number>              modding the level to a certain scale (default: 1)
+  --rec-scale <number>              modding the replay(s) to a certain scale (intentionally weird output, fitting a lev with a new scale) (default: 1)
   -D, --debug                       debug output
   --help                            display help for command
 ```
@@ -151,16 +153,38 @@ Results in something like:
 ```
 
 
+### Scale Level
+You can output a level if you want to scale it. Below is double size:
+```sh
+elma-imager-win.exe -l elmapath/lev/mylev.lev -o myproject/path/myscaledlev --lev-scale 2
+```
+
+
 ### Capture Framerate (Experimental)
 Replays are recorded in 30 fps, but displayed in Elasto Mania at a higher framerate. This feature is experimental for now.
 The framerate cannot be any number, so it will be approximated from the input value.
 - If the framerate is less than 30, it will work with 15 (every other), 10 (every third), ~7 (every fourth), and so on.
 - If the framerate is larger than 30, it will work with 60 (factor 2), 90 (factor 3), 120 (factor 4), and so on.
+- This feature is using skint0r's elmajs package.
+
 Below will capture with a framerate of 60.
 ```sh
 elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -C 60
 ```
 
+### Writing Replays
+There are some different ways to generate replays. See command list.
+
+When writing replays you can also provide a level. If doing so, the replays will be linked to that level.
+
+
+### Prolong or Shorten Replay
+Using the -C --capture-framerate feature you can also prolong and shorten replays. See above for factors you can use.
+
+Below will make the replay twice as slow (because 60 is the double of the default 30).
+```sh
+elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o elmapath/rec/mylongrec.rec -C 60
+```
 
 ### Custom LGR
 There are some lgrs included, which you can try out. See the ```elma-imager/img``` folder.
