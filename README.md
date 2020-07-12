@@ -172,6 +172,7 @@ Below will capture with a framerate of 60.
 elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -C 60
 ```
 
+
 ### Writing Replays
 There are some different ways to generate replays. See command list.
 
@@ -185,6 +186,7 @@ Below will make the replay twice as slow (because 60 is the double of the defaul
 ```sh
 elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o elmapath/rec/mylongrec.rec -C 60
 ```
+
 
 ### Custom LGR
 There are some lgrs included, which you can try out. See the ```elma-imager/img``` folder.
