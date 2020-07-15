@@ -22,6 +22,8 @@ exports.handle = function(recUri, frameRate, outputUri, scale, levUri, level){
 	});
 	else if ( frameMultiplier > 1 )
 	{
+		// todo: bug: interpolated frames are not rendered properly: x, y seems to be jumping
+		// todo: when finding edges, interpolated frames do not need to be checked
 		var newFrames = [];
 		for (var i=0; i<player1.frames.length; i++)
 		{
@@ -45,7 +47,9 @@ exports.handle = function(recUri, frameRate, outputUri, scale, levUri, level){
 					// bike rotation can jump from around 0 to around 10000, making the in-between around 5000
 					if (nextFrame.bikeRotation - frame.bikeRotation < 1000 && nextFrame.bikeRotation - frame.bikeRotation > -1000)
 						newFrame.bikeRotation = frame.bikeRotation + extraFrame * (nextFrame.bikeRotation - frame.bikeRotation)/frameMultiplier;
+					// so don't interpolate rotation for those frames
 					else newFrame.bikeRotation = frame.bikeRotation;
+					// similar to bike rotation, though rec files use a smaller constant for converting the values to coordinates
 					if (nextFrame.leftWheelRotation - frame.leftWheelRotation < 150 && nextFrame.leftWheelRotation - frame.leftWheelRotation > -150)
 							newFrame.leftWheelRotation = frame.leftWheelRotation + extraFrame * (nextFrame.leftWheelRotation - frame.leftWheelRotation)/frameMultiplier;
 					else newFrame.leftWheelRotation = frame.leftWheelRotation;

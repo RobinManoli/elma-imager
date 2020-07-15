@@ -21,6 +21,7 @@
     "elmajs": "^1.1.1",
     "gifencoder": "^2.0.1",
     "glob": "^7.1.6",
+    "pcx-js": "^1.1.0",
     "pkg": "^4.4.9",
     "temp-write": "^4.0.0"
   },
@@ -33,6 +34,9 @@
       "recReader.js",
       "recRender.js",
       "player.js",
+      "recHandler.js",
+      "levHandler.js",
+      "lgrHandler.js",
       "node_modules/canvas/lib/*.js"
     ]
   }

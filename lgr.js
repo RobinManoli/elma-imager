@@ -233,6 +233,7 @@ exports.make = function(path, kuskipath, shirtpathfilename, mkImage, mkCanv){
 	});
 
 	kuski_imgs.forEach(function(i){
+		//console.log('handling kuski image: ' + kuskipath + "/" + i + ".png" );
 		r[i] = lazy_(kuskipath + "/" + i + ".png", i);
 	});
 

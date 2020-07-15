@@ -3,8 +3,8 @@ console.time("Whole Script Time");
 
 const path = require('path');
 var fs = require("fs");
-var glob = require("glob")
-const { createCanvas, loadImage, Image } = require('canvas')
+var glob = require("glob");
+const { createCanvas, loadImage, Image } = require('canvas');
 const { program } = require('commander');
 
 
@@ -20,6 +20,7 @@ var Player = require("./player");
 
 var RecHandler = require("./recHandler");
 var LevHandler = require("./levHandler");
+var LgrHandler = require("./lgrHandler");
 
 module.exports = function() {
 
@@ -32,7 +33,7 @@ program
 	.option('-h, --height <number>', 'height of output frame', 0)
 	.option('-z, --zoom <number>', 'use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in', 1)
 	.option('-Z, --zoom-fit', "fill level inside output frame, and don't center on kuski")
-	.option('-g, --lgr <name>', 'folder name inside elma-imager/img with .png images for rendering all graphics', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
+	.option('-g, --lgr <name>', '.lgr file path or folder name inside elma-imager/img with .png images for rendering everything except the game character (kuski)', 'default') // add across, matrix, rec-circles (rendered when images don't exit)
 	.option('-k, --kuski <name>', 'folder name inside elma-imager/img with .png images for rendering kuski') // add across, matrix, rec-circles (rendered when images don't exit)
 	.option('-S, --shirt <name>', 'path and filename for .png shirt to use, for example elmapath/png/nickname.png')
 	.option('-s, --start <number>', 'starting frame (integer), or time in seconds (float, such as 1.0)', '0')
@@ -66,9 +67,12 @@ if (!program.lev && !program.rec){
 	process.exit();
 }
 
+var lgrData = LgrHandler.handle(program); // process some.lgr before handling program.lgr
+//console.log(lgrData);
+
 if (!program.lev){
 	program.lev = 'lev/min.lev';
-	if (output_filetype != 'rec') program.lgr = 'transparent';
+	if (output_filetype != 'rec') lgrData.name = 'transparent';
 	if (!program.kuski) program.kuski = 'default';
 }
 
@@ -76,12 +80,12 @@ if (!program.lev){
 if (!program.rec){
 	program.rec = 'rec/min.rec';
 	program.kuski = 'transparent';
-	program.shirt = 'img/transparent/q1body.png';
+	program.shirt = lgrData.path + 'transparent/q1body.png';
 	program.start = '0';
 	program.end = '0';
 }
-if (!program.kuski) program.kuski = program.lgr;
-if (!program.shirt) program.shirt = 'img/' + program.kuski + '/q1body.png'
+if (!program.kuski) program.kuski = lgrData.name;
+if (!program.shirt) program.shirt = lgrData.path + program.kuski + '/q1body.png'
 
 // process cmd options
 var recUri = program.rec;
@@ -94,7 +98,6 @@ var delay = parseInt(program.delay);
 var zoom = parseFloat(program.zoom);
 var levScale = parseFloat(program.levScale) || 1.0;
 var recScale = parseFloat(program.recScale) || 1.0;
-var lgrName = program.lgr;
 // not yet implemented
 var quality = 10;
 
@@ -125,7 +128,7 @@ for (var i=0; i<levFilenames.length; i++){
 	// fs.readFileSync(levUri, 'binary'); // old code before using levhandler
 	levs.push(lev);
 }
-var lgr = Lgr.make("img/" + lgrName, "img/" + program.kuski, program.shirt, function(){
+var lgr = Lgr.make("img/" + lgrData.name, "img/" + program.kuski, program.shirt, function(){
 	//return document.createElement("img"); // from https://maxdamantus.github.io/recplay/amd.js
 	return new Image();
 }, mkCanv );
@@ -230,7 +233,7 @@ function cropCanvas(requestedWidth, requestedHeight, player){
 	{
 		return; // cropping not expected, so exit
 	}
-	else if ( lgrName != 'transparent' || lgrName == program.kuski )
+	else if ( lgrData.name != 'transparent' || lgrData.name == program.kuski )
 	{
 		// if lgr is not transparent, or both lgr and kuski are transparent, do not crop
 		//console.log(lgr, "lgr not transparent, setting default width and height");
@@ -317,7 +320,7 @@ function writeGif(player, levFilename){
 	encoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
 	encoder.setDelay(delay); // frame delay in ms
 	encoder.setQuality(quality); // image quality. 10 is default.
-	if (lgrName == 'transparent') encoder.setTransparent("black"); // transparency goes black without this -- https://github.com/eugeneware/gifencoder/blob/master/lib/GIFEncoder.js
+	if (lgrData.name == 'transparent') encoder.setTransparent("black"); // transparency goes black without this -- https://github.com/eugeneware/gifencoder/blob/master/lib/GIFEncoder.js
 
 	for (var i=startingFrame; i<=endingFrame; i++)
 	{
@@ -331,7 +334,7 @@ function writeGif(player, levFilename){
 		encoder.addFrame(canv);
 	}
 	encoder.finish();
-	console.log( "Wrote " + _outputUri + ": " + framesToRender + " frames, " + width + " x " + height + " px");
+	console.log( "Wrote " + _outputUri + ": " + framesToRender + " frames, " + width + " x " + height + " px, delay: " + delay);
 }
 
 // write a sprite sheet

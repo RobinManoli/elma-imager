@@ -1,10 +1,11 @@
 # Elma Imager
 <!-- markdown editor: https://dillinger.io/ -->
-Tool for creating images from replays and levels, based on Maxdamantus' recplayer.
+Tool for creating images from, and batch converting, replays and levels, based on Maxdamantus' recplayer skint0r's elmajs package.
 
-- Writes gifs, png sequences, and even sprite sheets. The level or kuski can be transparent or your chosen lgr (if you make .png files with transparent background from it).
+- Writes gifs, png sequences, and even sprite sheets. The level or kuski can be transparent or your chosen lgr.
 - Makes the process of creating videos much easier than before.
-- Create single or multiple recs, but only reads from single recs
+- Creates single or multiple recs, but only reads from single recs
+- Creates .png from .lgr
 - Also comes with the fully functional recplayer WITH images! Works without even installing NPM, locally. Just open index.html. However, this is not up to date with the project.
 
 ![0lp31.gif](https://github.com/RobinManoli/elma-imager/blob/master/image_output/0lp31.gif?raw=true)
@@ -82,7 +83,7 @@ You can make anything you want transparent, using or editing the transparent fol
 - If you want to render any other image (for example an object), but still use cropping or create a .gif with transparency, copy the image as a .png from your desired lgr, and copy it to ```elma-imager/img/transparent```
 - You can check ```elma-imager/img/default``` to see what images the filenames represent. The filenames are the same as in ```elma-imager/img/transparent```.
 - If you later want to stop render something using the transparent lgr, and make that thing transparent again, copy one of the transparent pixel images inside ```elma-imager/img/transparent``` and rename it to the thing you now want to be transparent.
-- Transparency can render slowly if you don't set the width and height, because it first renders with a large frame to find the edges. The output will not be cut exactly at the edges, but instead with the kuski in the center.
+- Transparency can render slowly if you don't set the width and height, because it first renders with a large frame to find the edges. The output will not be cut exactly at the edges, but instead with the kuski in the center. Finding edges with higher capture-framerate is extra slow, so it might be worth to find the edges first, and then render with the capture-framerate value supplying the exact height and width.
 
 Below will start from frame 10 and process until frame 20, cropping near the edges.
 ```sh
@@ -106,14 +107,14 @@ elma-imager-win.exe -r elmapath/rec/29main.rec -R elmapath/rec/29*.rec -l elmapa
 ### Cli Options
 These are the available command line options:
 ```
-  -l, --lev <pathfilename>          path and filename for level to render, for example elmapath/lev/mylev.lev
+  -l, --lev <pattern>               path, filename and optionally pattern for levels to use, for example elmapath/lev/mylev.lev, or path/QWQUU*.lev
   -r, --rec <pathfilename>          path and filename for main replay to render, for example elmapath/rec/myrec.rec
   -o, --output <pattern>            output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/replay*.png, path/myrec.rec, path/mylev.lev (default: "")
   -w, --width <number>              width of output frame (default: 0)
   -h, --height <number>             height of output frame (default: 0)
   -z, --zoom <number>               use smaller than 1 (for example 0.5) to zoom out, or larger than 1 (for example 10) to zoom in (default: 1)
   -Z, --zoom-fit                    fill level inside output frame, and don't center on kuski
-  -g, --lgr <name>                  folder name inside elma-imager/img with .png images for rendering all graphics (default: "default")
+  -g, --lgr <name>                  .lgr file path or folder name inside elma-imager/img with .png images for rendering everything except the game character (kuski) (default: "default")
   -k, --kuski <name>                folder name inside elma-imager/img with .png images for rendering kuski
   -S, --shirt <name>                path and filename for .png shirt to use, for example elmapath/png/nickname.png
   -s, --start <number>              starting frame (integer), or time in seconds (float, such as 1.0) (default: "0")
@@ -180,7 +181,6 @@ Replays are recorded in 30 fps, but displayed in Elasto Mania at a higher framer
 The framerate cannot be any number, so it will be approximated from the input value.
 - If the framerate is less than 30, it will work with 15 (every other), 10 (every third), ~7 (every fourth), and so on.
 - If the framerate is larger than 30, it will work with 60 (factor 2), 90 (factor 3), 120 (factor 4), and so on.
-- This feature is using skint0r's elmajs package.
 
 Below will capture with a framerate of 60.
 ```sh
@@ -204,12 +204,30 @@ elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o elmap
 
 
 ### Custom LGR
-There are some lgrs included, which you can try out. See the ```elma-imager/img``` folder.
-Below the default lgr is used, but with player2's bike and body, and Spef's shirt (if you have converted it to a .png with transparent background, and saved in the correct path).
+You can use any .lgr file if you use the file's full path when using the -g --lgr option. This will create a folder of .png files inside ```elma-imager/img```. If you want to use an .lgr file for only the kuski or shirt, first use that .lgr with the -g --lgr option, so that a folder will be created for it. You can then access the graphics using the folder name.
+
+Note that any pictures missing in the .lgr will render red circles. To solve this in Windows 10, copy all files from ```elma-imager/img/transparent``` to ```elma-imager/img/your-lgr```, but choose to skip all files that are duplicates. In any other operating system, just copy the missing pictures from ```elma-imager/img/transparent``` to ```elma-imager/img/your-lgr```.
+
+If you only supply a name such as 'default' or 'transparent', that folder name inside ```elma-imager/img``` will be used.
+
+There are some lgr folders included, which you can try out. See the ```elma-imager/img``` folder.
+
+Below the default lgr is used, but with player2's kuski, and Spef's shirt (if you have converted it to a .png with transparent background, and saved in the correct path).
 ```sh
 elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -k default_kuski2 -S elmapath/png/spef.png
 ```
-You can use any lgr you want, as long as you can get the graphics as .png images with transparent backgrounds. Make copy of ```elma-imager/img/default``` to ```elma-imager/img/mylgr``` and replace the images there - with the same filenames!
+
+Below the Ancient lgr is used:
+```sh
+elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -g elmapath/lgr/Ancient.lgr
+```
+
+Below the Ancient lgr is used for the kuski only (will only work if you first ran the command above to create the Ancient folder):
+```sh
+elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -k Ancient
+```
+
+You can use any .png files you want as graphics, as long as you can get them with transparent backgrounds. Make copy of ```elma-imager/img/default``` to ```elma-imager/img/mylgr``` and replace the images there - with the same filenames!
 Then use the -g option:
 ```sh
 elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o myproject/path/myrec*.png -g mylgr
@@ -217,10 +235,10 @@ elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o mypro
 You can also create an lgr with only the kuski graphics, if you will be using another lgr for the other graphics. See the folder ```elma-imager/img/default_kuski2```
 
 
-### Your Own Shirt or Another Bike
-You can create a new lgr (see above) for each bike you want to use. Just replace the body, or any images you want, with the corresponding bodypart.
+### Your Own Shirt or Kuski
+You can create a new lgr (see above) for each kuski you want to use. Just replace the body, or any images you want, with the corresponding bodypart.
 You can also create a folder of .pngs with transparent backgrounds for any shirts you want to use.
-Note that if you use multiple replays for the same output they will all use the same bike and shirt.
+Note that if you use multiple replays for the same output they will all use the same kuski and shirt.
 
 
 ### Create a Spritemap
