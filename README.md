@@ -131,7 +131,8 @@ These are the available command line options:
 ### Output Filename
 If you want to keep track of the settings you've used you can save the commands in a textfile. But you can also automatically keep some information in the filenames.
 You use the name of the option (which you can see listed in the command line options above), prefixed by the % character, to use it in the filename.
-You can also use %frames to output the number of frames rendered.
+
+%lev becomes the filename of the level being used, and %frames outputs the number of frames rendered.
 
 Below will output the frame height and width in the filename:
 ```sh
@@ -157,6 +158,20 @@ Results in something like:
 You can output a level if you want to scale it. Below is double size:
 ```sh
 elma-imager-win.exe -l elmapath/lev/mylev.lev -o myproject/path/myscaledlev --lev-scale 2
+```
+
+
+### Using Multiple Levels at Once
+You can scale or render multiple levels at once, if you use a wildcard (* or ?) with the -l --lev option.
+
+Below will scale all levels in the folder to half size:
+```sh
+elma-imager-win.exe -l elmapath/lev*.lev -o myproject/%lev_half.lev --lev-scale 0.5
+
+Wrote myproject\dh_half.lev (): 87 polygons
+Wrote myproject\hb_half.lev (): 12 polygons
+Wrote myproject\tt_half.lev (): 26 polygons
+Wrote myproject\wu_half.lev (): 3 polygons
 ```
 
 

@@ -1,9 +1,9 @@
 var fs = require("fs");
 const path = require('path');
-const { Replay, Frame, Level } = require('elmajs');
+const { Replay, Frame } = require('elmajs');
 const tempWrite = require('temp-write');
 
-exports.handle = function(recUri, frameRate, outputUri, scale, levUri){
+exports.handle = function(recUri, frameRate, outputUri, scale, levUri, level){
 	var replayBuffer = fs.readFileSync(recUri);
 	var replay = Replay.from(replayBuffer);
 
@@ -96,12 +96,9 @@ exports.handle = function(recUri, frameRate, outputUri, scale, levUri){
 		}
 	}
 
-	if (levUri)
+	if (levUri && level)
 	{
-		// if a level is provided, make the written rec linked to that level
-		var levBuffer = fs.readFileSync(levUri);
-		var level = Level.from(levBuffer);
-		
+		// if a level uri and filename are provided, make the written rec linked to that level
 		replay.level = path.parse(levUri).base;
 		replay.link = level.link;
 		//console.log(replay, level);

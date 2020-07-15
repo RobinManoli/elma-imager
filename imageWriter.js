@@ -25,8 +25,8 @@ module.exports = function() {
 
 // https://www.npmjs.com/package/commander#options
 program
-	.option('-l, --lev <pathfilename>', 'path and filename for level to render, for example elmapath/lev/mylev.lev') // todo? transparent.lev if transparent output, make level where flower is not easily stumbled upon
-	.option('-r, --rec <pathfilename>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec') // not required if creating option to only render lev, using transparent bike
+	.option('-l, --lev <pattern>', 'path, filename and optionally pattern for levels to use, for example elmapath/lev/mylev.lev, or path/QWQUU*.lev')
+	.option('-r, --rec <pathfilename>', 'path and filename for main replay to render, for example elmapath/rec/myrec.rec')
 	.option('-o, --output <pattern>', 'output filename or pattern, for example myproject/path/myreplay.gif, or myproject/path/replay*.png, path/myrec.rec, path/mylev.lev', '')
 	.option('-w, --width <number>', 'width of output frame', 0)
 	.option('-h, --height <number>', 'height of output frame', 0)
@@ -86,7 +86,7 @@ if (!program.shirt) program.shirt = 'img/' + program.kuski + '/q1body.png'
 // process cmd options
 var recUri = program.rec;
 var outputUri = program.output;
-var levUri = program.lev;
+//var levUri = program.lev;
 //var levFilename = levUri.split('/').pop(); // works whether levUri contains a / or not // handled by path
 var width = parseInt(program.width);
 var height = parseInt(program.height);
@@ -117,14 +117,26 @@ function mkCanv(w, h){
 	return new createCanvas(w, h);
 }
 
-var lev = LevHandler.handle(levUri, outputUri, levScale); // fs.readFileSync(levUri, 'binary');
+var levFilenames = glob.sync(program.lev);
+var levs = [];
+for (var i=0; i<levFilenames.length; i++){
+	var levFilename = levFilenames[i];
+	var lev = LevHandler.handle(levFilename, renderFilename(outputUri, levFilename), levScale);
+	// fs.readFileSync(levUri, 'binary'); // old code before using levhandler
+	levs.push(lev);
+}
 var lgr = Lgr.make("img/" + lgrName, "img/" + program.kuski, program.shirt, function(){
 	//return document.createElement("img"); // from https://maxdamantus.github.io/recplay/amd.js
 	return new Image();
 }, mkCanv );
 
 // var pl = player.make(levRn.reader(lev), pllgr, mkCanv); // from https://maxdamantus.github.io/recplay/amd.js
-var player = Player.make(LevReader.reader(lev), lgr, mkCanv);
+var players = []; // one recplayer for each level
+for (var i=0; i<levs.length; i++){
+	var lev = levs[i];
+	var player = Player.make(LevReader.reader(lev), lgr, mkCanv);
+	players.push(player);
+}
 
 var longestReplay = 0;
 var replay; // focused replay or only replay if any
@@ -148,7 +160,7 @@ var shirts = []; // doesn't seem to be implemented yet in the recplayer project.
 for (var i=0; i<replays.length; i++){
 	var uri = replays[i];
 	//var rec = fs.readFileSync(uri, 'binary');
-	var rec = RecHandler.handle( uri, parseInt(program.captureFramerate), outputUri, recScale, levUri );
+	var rec = RecHandler.handle( uri, parseInt(program.captureFramerate), outputUri, recScale, levFilenames[0], levs[0] );
 	var readRec = RecReader.reader(rec);
 	//if (i == 0) console.log(readRec);
 	var _replay = player.addReplay(readRec, shirts);
@@ -213,7 +225,7 @@ function canvasPixelBoundingBox(croppingCanvas, croppingCanvasContext, bbox){
 }
 
 // make the canvas the size of all pixels -- only works with transparent lgr
-function cropCanvas(requestedWidth, requestedHeight){
+function cropCanvas(requestedWidth, requestedHeight, player){
 	if ( requestedWidth > 0 && requestedHeight > 0 )
 	{
 		return; // cropping not expected, so exit
@@ -265,7 +277,7 @@ function cropCanvas(requestedWidth, requestedHeight){
 	console.log("Done: " + width + " x " + height + " pixels");
 }
 
-function renderFilename( outputUri ){
+function renderFilename( outputUri, levFilename ){
 	var result = outputUri;
 	result = result.replace('%width', width);
 	result = result.replace('%height', height);
@@ -277,7 +289,7 @@ function renderFilename( outputUri ){
 	result = result.replace('%zoom', program.zoom);
 	result = result.replace('%delay', program.delay);
 	result = result.replace('%frames', framesToRender);
-	if (levUri) result = result.replace('%lev', path.parse(levUri).name);
+	if (levFilename) result = result.replace('%lev', path.parse(levFilename).name);
 	if (recUri)
 	{
 		var _recUri = recUri.replace('*', '');
@@ -294,9 +306,9 @@ function recreateCanvas(i){
 }
 
 
-function writeGif(){
+function writeGif(player, levFilename){
 	console.log("Creating animated .gif...");
-	var _outputUri = renderFilename(outputUri);
+	var _outputUri = renderFilename(outputUri, levFilename);
 	// https://github.com/eugeneware/gifencoder
 	const GIFEncoder = require('gifencoder');
 	const encoder = new GIFEncoder(width, height);
@@ -323,10 +335,10 @@ function writeGif(){
 }
 
 // write a sprite sheet
-function writePng(){
+function writePng(player, levFilename){
 	console.log("Creating sprite sheet...");
 	// since this is the default output, use a default filename is none is supplied
-	var _outputUri = renderFilename( outputUri ? outputUri: 'image_output/%rec_%framesframes_w%width_h%height_s%start_e%end_z%zoom_%lgr.png' );
+	var _outputUri = renderFilename( outputUri ? outputUri: 'image_output/%rec_%framesframes_w%width_h%height_s%start_e%end_z%zoom_%lgr.png', levFilename );
 	var buf;
 	var maxCols = 10
 	var rows = Math.ceil( framesToRender/maxCols )
@@ -355,10 +367,10 @@ function writePng(){
 
 }
 
-function writePngs(){
+function writePngs(player, levFilename){
 	console.log("Creating sequence of .pngs...");
 	var buf, _outputUri;
-	outputUri = renderFilename(outputUri);
+	outputUri = renderFilename(outputUri, levFilename);
 
 	//if ( outputUri.endsWith('/') ) outputUriPattern = outputUri + path.parse(levUri).name + '*.png';
 	var frameDigits = ("" + endingFrame).length; // max number of digits of frames
@@ -378,18 +390,22 @@ function writePngs(){
 
 // todo: stop here if not writing image
 
-cropCanvas(width, height);
-//console.log("creating canvas", width, height, zoom);
-var canvas = new createCanvas(width, height);
-var canv = canvas.getContext("2d");
-player.drawFrame(canv, 0, 0, width, height, 0); // first frame drawing has weird sky placement, so do this before writing anything
-if ( program.zoomFit ) player.fitLev();
-else player.setScale( zoom );
+for (var i=0; i<players.length; i++){
+	var player = players[i];
+	cropCanvas(width, height, player);
+	//console.log("creating canvas", width, height, zoom);
+
+	var canvas = new createCanvas(width, height);
+	var canv = canvas.getContext("2d");
+	player.drawFrame(canv, 0, 0, width, height, 0); // first frame drawing has weird sky placement, so do this before writing anything
+	if ( program.zoomFit ) player.fitLev();
+	else player.setScale( zoom );
 
 
-if (output_filetype == 'gif') writeGif();
-else if (output_filetype == 'png') writePng();
-else if (output_filetype == 'pngs') writePngs();
+	if (output_filetype == 'gif') writeGif(player, levFilenames[i]);
+	else if (output_filetype == 'png') writePng(player, levFilenames[i]);
+	else if (output_filetype == 'pngs') writePngs(player, levFilenames[i]);
+}
 console.timeEnd("Whole Script Time");
 
 }
