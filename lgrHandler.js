@@ -1,5 +1,6 @@
 var fs = require("fs");
 var pcx = require('pcx-js');
+var Lgr = require("./lgr");
 const path = require('path');
 const tempWrite = require('temp-write');
 const { LGR } = require('elmajs');
@@ -9,15 +10,17 @@ exports.handle = function(program){
 	var lgrUri = program.lgr;
 	var lgrPath = 'img/';
 	var lgrName = path.parse(program.lgr).name;
-	//console.log(Object.keys(lgrObj), lgrPath, lgrName);
+	console.log(lgrPath, lgrName);
 
 	var i;
 	if (program.lgr.endsWith('.lgr'))
 	{
 		var lgrBuffer = fs.readFileSync(lgrUri);
-		var lgrObj = LGR.from(lgrBuffer);
+		var lgrObj = LGR.from(lgrBuffer); // elmajs object
 		var replaceFilenames = { q1bike:'bike', q1head:'head', q1wheel:'wheel' }; // some filenames in recPlayer are not the same as in lgr files, so replace them
-		
+		var written = [];
+		//console.log(Object.keys(lgrObj), lgrPath, lgrName);
+
 		// write lgr as png
 		if (!fs.existsSync(lgrPath + lgrName)){
 			fs.mkdirSync(lgrPath + lgrName);
@@ -32,14 +35,22 @@ exports.handle = function(program){
 			imgUri = lgrPath + lgrName + '/' + filename;
 			//fs.writeFileSync(imgUri, pcxData); // write pcx file, working
 			imgUri = imgUri.replace('.pcx', '.png');
-			if ( replaceFilenames.hasOwnProperty(name) ) imgUri = imgUri.replace(name, replaceFilenames[name]);
+			if ( replaceFilenames.hasOwnProperty(name) )
+			{
+				imgUri = imgUri.replace(name, replaceFilenames[name]);
+				name = name.replace(name, replaceFilenames[name]);
+			}
+			written.push(name);
 			if ( fs.existsSync(imgUri) ) continue;
 
 			// write png
 			console.log('Writing ' + imgUri + '...');
 			pcxObj = new pcx(pcxData);
+			//console.log(pcxObj);
 			var canvas = new createCanvas(pcxObj.width, pcxObj.height);
 			var context = canvas.getContext("2d");
+			//var context = canvas.getContext('2d', { pixelFormat: 'A8' }); // 8 bits
+
 			// create transparenct image
 			imageData = context.createImageData(pcxObj.width, pcxObj.height); // https://warpdesign.github.io/pcx-js/js/browserSupport.js
 			//canvasImageData.data.set(pcxObj.decode().pixelArray); // draw whole pcx, ignores transparency
@@ -63,10 +74,36 @@ exports.handle = function(program){
 			}
 
 			context.putImageData(imageData, 0, 0);
-			var buf = canvas.toBuffer();
+			var buf = canvas.toBuffer('image/png', { palette: pcxObj.header.palette }); // using palette seems to require less memory when creating images later
 			fs.writeFileSync(imgUri, buf);
 		}
 	}
+
+	// create transparent files of all missing required .pngs
+	var lgrObj2 = Lgr.make(); // recPlayer object
+	var requiredFiles = [ lgrObj2.shirt_img ];
+	//console.log(written);
+	requiredFiles.push.apply(requiredFiles, lgrObj2.imgs);
+	requiredFiles.push.apply(requiredFiles, lgrObj2.kuski_imgs);
+	requiredFiles.push.apply(requiredFiles, lgrObj2.picts.map(function(pict){
+		return pict[0];
+	}));
+	
+	var missingFiles = requiredFiles.filter( function( el ) {
+		return !written.includes( el );
+	} );
+	//console.log(missingFiles);
+	for (i=0; i<missingFiles.length; i++)
+	{
+		var canvas = new createCanvas(1, 1);
+		var context = canvas.getContext("2d");
+		var name = missingFiles[i];
+		imgUri = lgrPath + lgrName + '/' + name + '.png';
+		var buf = canvas.toBuffer();
+		console.log('Writing ' + imgUri + '...');
+		fs.writeFileSync(imgUri, buf);
+	}
+
 
 	// todo?
 	/*

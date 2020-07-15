@@ -1,6 +1,6 @@
 # Elma Imager
 <!-- markdown editor: https://dillinger.io/ -->
-Tool for creating images from, and batch converting, replays and levels, based on Maxdamantus' recplayer skint0r's elmajs package.
+Tool for creating images from, and batch converting, replays and levels, based on Maxdamantus' recplayer and skint0r's elmajs package.
 
 - Writes gifs, png sequences, and even sprite sheets. The level or kuski can be transparent or your chosen lgr.
 - Makes the process of creating videos much easier than before.
@@ -179,8 +179,8 @@ Wrote myproject\wu_half.lev (): 3 polygons
 ### Capture Framerate (Experimental)
 Replays are recorded in 30 fps, but displayed in Elasto Mania at a higher framerate. This feature is experimental for now.
 The framerate cannot be any number, so it will be approximated from the input value.
-- If the framerate is less than 30, it will work with 15 (every other), 10 (every third), ~7 (every fourth), and so on.
-- If the framerate is larger than 30, it will work with 60 (factor 2), 90 (factor 3), 120 (factor 4), and so on.
+- If the framerate is less than 30, it will work with 15 (keep every other frame), 10 (every third), ~7 (every fourth), and so on.
+- If the framerate is larger than 30, it will work with 60 (factor 2, interpolate one frame between each), 90 (factor 3, interpolate two frames between each), 120 (factor 4), and so on.
 
 Below will capture with a framerate of 60.
 ```sh
@@ -204,9 +204,7 @@ elma-imager-win.exe -r elmapath/rec/myrec.rec -l elmapath/lev/mylev.lev -o elmap
 
 
 ### Custom LGR
-You can use any .lgr file if you use the file's full path when using the -g --lgr option. This will create a folder of .png files inside ```elma-imager/img```. If you want to use an .lgr file for only the kuski or shirt, first use that .lgr with the -g --lgr option, so that a folder will be created for it. You can then access the graphics using the folder name.
-
-Note that any pictures missing in the .lgr will render red circles. To solve this in Windows 10, copy all files from ```elma-imager/img/transparent``` to ```elma-imager/img/your-lgr```, but choose to skip all files that are duplicates. In any other operating system, just copy the missing pictures from ```elma-imager/img/transparent``` to ```elma-imager/img/your-lgr```.
+You can use any .lgr file if you use the file's full path when using the -g --lgr option. This will create a folder of .png files inside ```elma-imager/img```. If you want to use an .lgr file for only the kuski or shirt, first use that .lgr with the -g --lgr option, so that a folder will be created. You can then access the graphics using the folder name.
 
 If you only supply a name such as 'default' or 'transparent', that folder name inside ```elma-imager/img``` will be used.
 

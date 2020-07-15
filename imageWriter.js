@@ -383,6 +383,7 @@ function writePngs(player, levFilename){
 		recreateCanvas(i);
 		player.drawFrame(canv, 0, 0, width, height, frame);
 		// https://github.com/Automattic/node-canvas
+		console.log(frame);
 		buf = canvas.toBuffer(); // mimeType can be set to image/png, image/jpeg -- png is default
 		var zeroPaddedFrameNumber = String(frame).padStart(frameDigits, '0');
 		_outputUri = outputUri.replace('*', zeroPaddedFrameNumber)

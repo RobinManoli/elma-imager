@@ -236,6 +236,11 @@ exports.make = function(path, kuskipath, shirtpathfilename, mkImage, mkCanv){
 		//console.log('handling kuski image: ' + kuskipath + "/" + i + ".png" );
 		r[i] = lazy_(kuskipath + "/" + i + ".png", i);
 	});
+	
+	r.imgs = imgs;
+    r.kuski_imgs = kuski_imgs;
+	r.shirt_img = shirt_img;
+	r.picts = picts;
 
 	r[shirt_img] = lazy_(shirtpathfilename, shirt_img);
 
