@@ -197,7 +197,7 @@ exports.renderer = function recRender(reader){
 			var rightR = rightRi(frame)*Math.PI*2/250;
 			var headX = headXi(frame)/1000;
 			var headY = headYi(frame)/1000;
-			var lastTurnF = lastTurn(frame);
+			var lastTurnF = lastTurn(frame) - 1;
 			var lv = lastVolt(frame);
 
 			var animlen = 28;
