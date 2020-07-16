@@ -1,6 +1,6 @@
 {
   "name": "elma-imager",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Elasto Mania image creator, .png and .gif",
   "devDependencies": {
     "browserify": "^16.5.1"

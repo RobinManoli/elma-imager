@@ -10,7 +10,7 @@ exports.handle = function(program){
 	var lgrUri = program.lgr;
 	var lgrPath = 'img/';
 	var lgrName = path.parse(program.lgr).name;
-	console.log(lgrPath, lgrName);
+	//console.log(lgrPath, lgrName);
 
 	var i;
 	if (program.lgr.endsWith('.lgr'))
@@ -77,42 +77,41 @@ exports.handle = function(program){
 			var buf = canvas.toBuffer('image/png', { palette: pcxObj.header.palette }); // using palette seems to require less memory when creating images later
 			fs.writeFileSync(imgUri, buf);
 		}
-	}
 
-	// create transparent files of all missing required .pngs
-	var lgrObj2 = Lgr.make(); // recPlayer object
-	var requiredFiles = [ lgrObj2.shirt_img ];
-	//console.log(written);
-	requiredFiles.push.apply(requiredFiles, lgrObj2.imgs);
-	requiredFiles.push.apply(requiredFiles, lgrObj2.kuski_imgs);
-	requiredFiles.push.apply(requiredFiles, lgrObj2.picts.map(function(pict){
-		return pict[0];
-	}));
-	
-	var missingFiles = requiredFiles.filter( function( el ) {
-		return !written.includes( el );
-	} );
-	//console.log(missingFiles);
-	for (i=0; i<missingFiles.length; i++)
-	{
-		var canvas = new createCanvas(1, 1);
-		var context = canvas.getContext("2d");
-		var name = missingFiles[i];
-		imgUri = lgrPath + lgrName + '/' + name + '.png';
-		var buf = canvas.toBuffer();
-		console.log('Writing ' + imgUri + '...');
-		fs.writeFileSync(imgUri, buf);
-	}
+		// create transparent files of all missing required .pngs
+		var lgrObj2 = Lgr.make(); // recPlayer object
+		var requiredFiles = [ lgrObj2.shirt_img ];
+		//console.log(written);
+		requiredFiles.push.apply(requiredFiles, lgrObj2.imgs);
+		requiredFiles.push.apply(requiredFiles, lgrObj2.kuski_imgs);
+		requiredFiles.push.apply(requiredFiles, lgrObj2.picts.map(function(pict){
+			return pict[0];
+		}));
+		
+		var missingFiles = requiredFiles.filter( function( el ) {
+			return !written.includes( el );
+		} );
+		//console.log(missingFiles);
+		for (i=0; i<missingFiles.length; i++)
+		{
+			var canvas = new createCanvas(1, 1);
+			var context = canvas.getContext("2d");
+			var name = missingFiles[i];
+			imgUri = lgrPath + lgrName + '/' + name + '.png';
+			var buf = canvas.toBuffer();
+			console.log('Writing ' + imgUri + '...');
+			fs.writeFileSync(imgUri, buf);
+		}
 
-
-	// todo?
-	/*
-	if ( program.skipSavingLgrAsPng )
-	{
-		var lgrpath = tempWrite.sync('lgrpath');
-		var somefile = tempWrite.sync('lgrpath', 'file.png');
+		// todo?
+		/*
+		if ( program.skipSavingLgrAsPng )
+		{
+			var lgrpath = tempWrite.sync('lgrpath');
+			var somefile = tempWrite.sync('lgrpath', 'file.png');
+		}
+		*/
 	}
-	*/
 
 	return { path:lgrPath, name:lgrName };
 }
