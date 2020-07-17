@@ -154,7 +154,10 @@ exports.renderer = function recRender(reader){
 	}
 
 	function turnScale(x){
-		return -Math.cos(x*Math.PI);
+		//console.log("recRender.js turnScale", -Math.cos(x*Math.PI))
+		var result = -Math.cos(x*Math.PI);
+		if ( Math.abs(result) < 0.0001 ) return 0.0001; // if this value is too small, such as -6.123233995736766e-17, canvas.toBuffer crashes
+		return result;
 	}
 
 	var bikeXi = interpolate(reader.bikeX);
