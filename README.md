@@ -19,7 +19,7 @@ This is for reference only. You don't need to do this to install.
 ```sh
 cd elma-imager
 npm install
-pkg .
+pkg . --options max_old_space_size=4096
 ```
 You can now run commands (slower) using:
 ```sh

@@ -1,13 +1,14 @@
 {
   "name": "elma-imager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Elasto Mania image creator, .png and .gif",
   "devDependencies": {
     "browserify": "^16.5.1"
   },
   "scripts": {
     "amd-fake": "browserify amd-fake.js -o amd.js",
-    "img": "node elma-imager.js"
+    "img": "node --max-old-space-size=4096 elma-imager.js",
+	"test": "node test.js"
   },
   "repository": {
     "type": "git",

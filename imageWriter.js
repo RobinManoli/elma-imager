@@ -302,10 +302,11 @@ function renderFilename( outputUri, levFilename ){
 	return result;
 }
 
-// for an unknown reason some recs fail, but it works with this hack to recreate the canvas
+// for an unknown reason (memory?) some recs fail, but it works with this hack to recreate the canvas
 function recreateCanvas(i){
 	canvas = new createCanvas(width, height);
 	canv = canvas.getContext("2d");
+	//canv.clearRect(0, 0, width, height); // uses more memory
 }
 
 
@@ -383,8 +384,11 @@ function writePngs(player, levFilename){
 		recreateCanvas(i);
 		player.drawFrame(canv, 0, 0, width, height, frame);
 		// https://github.com/Automattic/node-canvas
-		console.log(frame);
-		buf = canvas.toBuffer(); // mimeType can be set to image/png, image/jpeg -- png is default
+		//console.log(frame);
+
+		buf = canvas.toBuffer('image/png'); // mimeType can be set to image/png, image/jpeg -- png is default
+		//buf = canvas.toBuffer('image/png', {compressionLevel: 10, filters: canvas.PNG_FILTER_NONE}); // mimeType can be set to image/png, image/jpeg -- png is default
+		//buf = canvas.toBuffer('image/jpeg', {});
 		var zeroPaddedFrameNumber = String(frame).padStart(frameDigits, '0');
 		_outputUri = outputUri.replace('*', zeroPaddedFrameNumber)
 		fs.writeFileSync(_outputUri, buf);
@@ -411,5 +415,15 @@ for (var i=0; i<players.length; i++){
 	else if (output_filetype == 'pngs') writePngs(player, levFilenames[i]);
 }
 console.timeEnd("Whole Script Time");
+
+/*
+const v8 = require('v8');
+var used = process.memoryUsage().heapUsed / 1024 / 1024;
+console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
+
+var totalHeapSize = v8.getHeapStatistics().total_available_size;
+var totalHeapSizeGb = (totalHeapSize / 1024 / 1024 / 1024).toFixed(2);
+console.log('totalHeapSizeGb: ', totalHeapSizeGb);
+*/
 
 }

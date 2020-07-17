@@ -8,6 +8,8 @@ rec/*
 lgr/*
 img/*
 
+bug.js
+
 !rec/min.rec
 
 !image_output/29be420_z1_transparent.gif
