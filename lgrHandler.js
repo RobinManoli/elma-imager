@@ -18,8 +18,16 @@ exports.handle = function(program){
 		var lgrBuffer = fs.readFileSync(lgrUri);
 		var lgrObj = LGR.from(lgrBuffer); // elmajs object
 		var replaceFilenames = { q1bike:'bike', q1head:'head', q1wheel:'wheel' }; // some filenames in recPlayer are not the same as in lgr files, so replace them
+		var nonTransparent = ['barrel', 'brick', 'bridge', 'ground', 'maskbig', 'maskhor', 'masklitt', 'qframe', 'qgrass', 'sky', 'stone1', 'stone2', 'stone3']; // do not make these with transparency
 		var written = [];
-		//console.log(Object.keys(lgrObj), lgrPath, lgrName);
+		var pictureListData = {};
+		//console.log(Object.keys(lgrObj), lgrPath, lgrName, lgrObj.pictureList.length, lgrObj.pictureData.length, lgrObj.pictureList[0], lgrObj.pictureData[0]);
+
+		for (i=0; i<lgrObj.pictureList.length; i++)
+		{
+			var pictureListItem = lgrObj.pictureList[i];
+			pictureListData[pictureListItem.name] = pictureListItem;
+		}
 
 		// write lgr as png
 		if (!fs.existsSync(lgrPath + lgrName)){
@@ -30,8 +38,9 @@ exports.handle = function(program){
 			var filename = lgrObj.pictureData[i].name.toLowerCase();
 			var name = path.parse(filename).name;
 			var pcxData = lgrObj.pictureData[i].data;
-			var imgData = lgrObj.pictureList[i];
-			//console.log(filename, imgData)
+			var imgData = pictureListData[name];
+			var imageHasTransparency = !nonTransparent.includes(name);
+			//console.log(filename, name, imgData, lgrObj.pictureData[i], imageHasTransparency);
 			imgUri = lgrPath + lgrName + '/' + filename;
 			//fs.writeFileSync(imgUri, pcxData); // write pcx file, working
 			imgUri = imgUri.replace('.pcx', '.png');
@@ -49,7 +58,7 @@ exports.handle = function(program){
 			//console.log(pcxObj);
 			var canvas = new createCanvas(pcxObj.width, pcxObj.height);
 			var context = canvas.getContext("2d");
-			//var context = canvas.getContext('2d', { pixelFormat: 'A8' }); // 8 bits
+			//var context = canvas.getContext('2d', { pixelFormat: 'A8' }); // 8 bits, but weird output
 
 			// create transparenct image
 			imageData = context.createImageData(pcxObj.width, pcxObj.height); // https://warpdesign.github.io/pcx-js/js/browserSupport.js
@@ -66,7 +75,7 @@ exports.handle = function(program){
 				pixelG = pixelArray[i + 1];
 				pixelB = pixelArray[i + 2];
 				pixelA = pixelArray[i + 3];
-				var transparency = pixelR == transparentPixelR && pixelG == transparentPixelG && pixelB == transparentPixelB && pixelA == transparentPixelA; // transparent if same value as first pixel
+				var transparency = imageHasTransparency && pixelR == transparentPixelR && pixelG == transparentPixelG && pixelB == transparentPixelB && pixelA == transparentPixelA; // transparent if same value as first pixel
 				imageData.data[i + 0] = pixelR;
 				imageData.data[i + 1] = pixelG;
 				imageData.data[i + 2] = pixelB;
@@ -75,6 +84,7 @@ exports.handle = function(program){
 
 			context.putImageData(imageData, 0, 0);
 			var buf = canvas.toBuffer('image/png', { palette: pcxObj.header.palette }); // using palette seems to require less memory when creating images later
+			//var buf = canvas.toBuffer(); // using palette seems to require less memory when creating images later
 			fs.writeFileSync(imgUri, buf);
 		}
 
